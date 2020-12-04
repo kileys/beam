@@ -116,7 +116,7 @@ dependencies {
 
 def dataflowProject = project.findProperty('dataflowProject') ?: 'apache-beam-testing'
 def dataflowRegion = project.findProperty('dataflowRegion') ?: 'us-central1'
-def dataflowValidatesTempRoot = project.findProperty('dataflowTempRoot') ?: 'gs://temp-storage-for-validates-runner-tests'
+def dataflowValidatesTempRoot = project.findProperty('dataflowTempRoot') ?: 'gs://apache-beam-testing-kileysok/tmp'
 def dataflowPostCommitTempRoot = project.findProperty('dataflowTempRoot') ?: 'gs://temp-storage-for-end-to-end-tests'
 def dataflowPostCommitTempRootKms = project.findProperty('dataflowTempRootKms') ?: 'gs://temp-storage-for-end-to-end-tests-cmek'
 def dataflowUploadTemp = project.findProperty('dataflowTempRoot') ?: 'gs://temp-storage-for-upload-tests'
@@ -144,7 +144,7 @@ def runnerV2PipelineOptions = [
   "--region=${dataflowRegion}",
   "--tempRoot=${dataflowValidatesTempRoot}",
   "--workerHarnessContainerImage=${dockerImageContainer}:${dockerTag}",
-  "--experiments=beam_fn_api,use_unified_worker,use_runner_v2",
+  "--experiments=beam_fn_api,use_unified_worker,use_runner_v2,use_portable_job_submission",
 ]
 
 def commonLegacyExcludeCategories = [

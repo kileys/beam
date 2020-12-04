@@ -909,6 +909,10 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
     if (containsUnboundedPCollection(pipeline)) {
       options.setStreaming(true);
     }
+    DataflowPipelineOptions dataflowOptions = options.as(DataflowPipelineOptions.class);
+    DataflowPackage stagedPipeline =
+        options.getStager().stageToFile(PipelineTranslation.toProto(pipeline).toByteArray(), PIPELINE_FILE_NAME);
+    dataflowOptions.setPipelineUrl(stagedPipeline.getLocation());
     replaceTransforms(pipeline);
 
     LOG.info(
@@ -918,7 +922,6 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
     // Capture the sdkComponents for look up during step translations
     SdkComponents sdkComponents = SdkComponents.create();
 
-    DataflowPipelineOptions dataflowOptions = options.as(DataflowPipelineOptions.class);
     String workerHarnessContainerImageURL = DataflowRunner.getContainerImageForJob(dataflowOptions);
     RunnerApi.Environment defaultEnvironmentForDataflow =
         Environments.createDockerEnvironment(workerHarnessContainerImageURL);
@@ -962,10 +965,10 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
     // the options on the new job
     // TODO: add an explicit `pipeline` parameter to the submission instead of pipeline options
     LOG.info("Staging pipeline description to {}", options.getStagingLocation());
-    byte[] serializedProtoPipeline = jobSpecification.getPipelineProto().toByteArray();
-    DataflowPackage stagedPipeline =
-        options.getStager().stageToFile(serializedProtoPipeline, PIPELINE_FILE_NAME);
-    dataflowOptions.setPipelineUrl(stagedPipeline.getLocation());
+    // byte[] serializedProtoPipeline = jobSpecification.getPipelineProto().toByteArray();
+    // DataflowPackage stagedPipeline =
+    //     options.getStager().stageToFile(serializedProtoPipeline, PIPELINE_FILE_NAME);
+    // dataflowOptions.setPipelineUrl(stagedPipeline.getLocation());
 
     if (!isNullOrEmpty(dataflowOptions.getDataflowWorkerJar())) {
       List<String> experiments =
