@@ -143,8 +143,9 @@ def runnerV2PipelineOptions = [
   "--project=${dataflowProject}",
   "--region=${dataflowRegion}",
   "--tempRoot=${dataflowValidatesTempRoot}",
+//  "--apiRootUrl=https://dataflow-staging.sandbox.googleapis.com",
   "--workerHarnessContainerImage=${dockerImageContainer}:${dockerTag}",
-  "--experiments=beam_fn_api,use_unified_worker,use_runner_v2",
+  "--experiments=beam_fn_api,use_unified_worker,use_runner_v2,use_portable_job_submission",
 ]
 
 def commonLegacyExcludeCategories = [
@@ -564,8 +565,7 @@ task examplesJavaLegacyWorkerIntegrationTest(type: Test) {
 
   // The examples/java preCommit task already covers running WordCountIT/WindowedWordCountIT so
   // this postCommit integration test excludes them.
-  include '**/*IT.class'
-  exclude '**/WordCountIT.class'
+  include '**/WordCountIT.class'
   exclude '**/WindowedWordCountIT.class'
   maxParallelForks 4
   classpath = configurations.examplesJavaIntegrationTest
@@ -581,8 +581,7 @@ task examplesJavaRunnerV2IntegrationTest(type: Test) {
 
   // The examples/java preCommit task already covers running WordCountIT/WindowedWordCountIT so
   // this postCommit integration test excludes them.
-  include '**/*IT.class'
-  exclude '**/WordCountIT.class'
+  include '**/WordCountIT.class'
   exclude '**/WindowedWordCountIT.class'
   exclude '**/TopWikipediaSessionsIT.class'
   exclude '**/AutoCompleteIT.class'

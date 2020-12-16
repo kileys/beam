@@ -462,6 +462,7 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
         .add(
             PTransformOverride.of(
                 PTransformMatchers.emptyFlatten(), EmptyFlattenAsCreateFactory.instance()));
+
     if (!fnApiEnabled) {
       // By default Dataflow runner replaces single-output ParDo with a ParDoSingle override.
       // However, we want a different expansion for single-output splittable ParDo.
@@ -909,32 +910,54 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
     if (containsUnboundedPCollection(pipeline)) {
       options.setStreaming(true);
     }
-    replaceTransforms(pipeline);
 
     LOG.info(
         "Executing pipeline on the Dataflow Service, which will have billing implications "
             + "related to Google Compute Engine usage and other Google Cloud Services.");
-
-    // Capture the sdkComponents for look up during step translations
-    SdkComponents sdkComponents = SdkComponents.create();
-
     DataflowPipelineOptions dataflowOptions = options.as(DataflowPipelineOptions.class);
     String workerHarnessContainerImageURL = DataflowRunner.getContainerImageForJob(dataflowOptions);
     RunnerApi.Environment defaultEnvironmentForDataflow =
         Environments.createDockerEnvironment(workerHarnessContainerImageURL);
 
-    sdkComponents.registerEnvironment(
+    // Capture the sdkComponents for look up during step translations
+    SdkComponents portableComponents = SdkComponents.create();
+    portableComponents.registerEnvironment(
         defaultEnvironmentForDataflow
             .toBuilder()
             .addAllDependencies(getDefaultArtifacts())
             .addAllCapabilities(Environments.getJavaCapabilities())
             .build());
+    RunnerApi.Pipeline portablePipelineProto = PipelineTranslation.toProto(pipeline, portableComponents, false);
+    LOG.info("Portable pipeline proto:\n{}", TextFormat.printToString(portablePipelineProto));
 
-    RunnerApi.Pipeline pipelineProto = PipelineTranslation.toProto(pipeline, sdkComponents, true);
 
-    LOG.debug("Portable pipeline proto:\n{}", TextFormat.printToString(pipelineProto));
+    replaceTransforms(pipeline);
+    // Capture the sdkComponents for look up during step translations
+    SdkComponents dataflowV1Components = SdkComponents.create();
+    dataflowV1Components.registerEnvironment(
+        defaultEnvironmentForDataflow.toBuilder()
+            .addAllDependencies(getDefaultArtifacts())
+            .addAllCapabilities(Environments.getJavaCapabilities())
+            .build());
+    RunnerApi.Pipeline dataflowV1PipelineProto =
+        PipelineTranslation.toProto(pipeline, dataflowV1Components, true);
+    LOG.info(
+        "Dataflow v1 pipeline proto:\n{}",
+        TextFormat.printToString(dataflowV1PipelineProto));
 
-    List<DataflowPackage> packages = stageArtifacts(pipelineProto);
+    // Stage the pipeline, retrieving the staged pipeline path, then update
+    // the options on the new job
+    // TODO: add an explicit `pipeline` parameter to the submission instead of pipeline options
+    LOG.info("Staging pipeline description to {}", options.getStagingLocation());
+    if (hasExperiment(options, "use_portable_job_submission")) {
+      DataflowPackage stagedPipeline =
+          options.getStager().stageToFile(portablePipelineProto.toByteArray(), PIPELINE_FILE_NAME);
+      dataflowOptions.setPipelineUrl(stagedPipeline.getLocation());
+    } else {
+      DataflowPackage stagedPipeline =
+          options.getStager().stageToFile(dataflowV1PipelineProto.toByteArray(), PIPELINE_FILE_NAME);
+      dataflowOptions.setPipelineUrl(stagedPipeline.getLocation());
+    }
 
     // Set a unique client_request_id in the CreateJob request.
     // This is used to ensure idempotence of job creation across retried
@@ -955,18 +978,6 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
     // update the options.
     maybeRegisterDebuggee(dataflowOptions, requestId);
 
-    JobSpecification jobSpecification =
-        translator.translate(pipeline, pipelineProto, sdkComponents, this, packages);
-
-    // Stage the pipeline, retrieving the staged pipeline path, then update
-    // the options on the new job
-    // TODO: add an explicit `pipeline` parameter to the submission instead of pipeline options
-    LOG.info("Staging pipeline description to {}", options.getStagingLocation());
-    byte[] serializedProtoPipeline = jobSpecification.getPipelineProto().toByteArray();
-    DataflowPackage stagedPipeline =
-        options.getStager().stageToFile(serializedProtoPipeline, PIPELINE_FILE_NAME);
-    dataflowOptions.setPipelineUrl(stagedPipeline.getLocation());
-
     if (!isNullOrEmpty(dataflowOptions.getDataflowWorkerJar())) {
       List<String> experiments =
           dataflowOptions.getExperiments() == null
@@ -976,6 +987,9 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
       dataflowOptions.setExperiments(experiments);
     }
 
+    List<DataflowPackage> packages = stageArtifacts(dataflowV1PipelineProto);
+    JobSpecification jobSpecification =
+        translator.translate(pipeline, dataflowV1PipelineProto, dataflowV1Components, this, packages);
     Job newJob = jobSpecification.getJob();
     try {
       newJob
