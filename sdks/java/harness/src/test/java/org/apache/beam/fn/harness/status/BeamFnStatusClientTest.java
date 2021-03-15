@@ -60,6 +60,7 @@ public class BeamFnStatusClientTest {
       Endpoints.ApiServiceDescriptor.newBuilder()
           .setUrl(this.getClass().getName() + "-" + UUID.randomUUID().toString())
           .build();
+
   @Test
   public void testActiveBundleState() {
     ProcessBundleHandler handler = mock(ProcessBundleHandler.class);
@@ -80,9 +81,7 @@ public class BeamFnStatusClientTest {
     ManagedChannelFactory channelFactory = InProcessManagedChannelFactory.create();
     BeamFnStatusClient client =
         new BeamFnStatusClient(
-            apiServiceDescriptor,
-            channelFactory::forDescriptor,
-            handler.getBundleProcessorCache());
+            apiServiceDescriptor, channelFactory::forDescriptor, handler.getBundleProcessorCache());
     StringJoiner joiner = new StringJoiner("\n");
     client.activeProcessBundleState(joiner);
     String actualState = joiner.toString();
@@ -98,12 +97,12 @@ public class BeamFnStatusClientTest {
   @Test
   public void testWorkerStatusResponse() throws Exception {
     BlockingQueue<WorkerStatusResponse> values = new LinkedBlockingQueue<>();
-    BlockingQueue<StreamObserver<WorkerStatusRequest>> requestObservers = new LinkedBlockingQueue<>();
+    BlockingQueue<StreamObserver<WorkerStatusRequest>> requestObservers =
+        new LinkedBlockingQueue<>();
     AtomicReference<StreamObserver<WorkerStatusRequest>> outboundServerObserver =
         new AtomicReference<>();
     StreamObserver<WorkerStatusResponse> inboundServerObserver =
-        TestStreams.withOnNext(values::add)
-            .build();
+        TestStreams.withOnNext(values::add).build();
     Server server =
         InProcessServerBuilder.forName(apiServiceDescriptor.getUrl())
             .addService(
@@ -125,9 +124,7 @@ public class BeamFnStatusClientTest {
       ManagedChannelFactory channelFactory = InProcessManagedChannelFactory.create();
       BeamFnStatusClient client =
           new BeamFnStatusClient(
-              apiServiceDescriptor,
-              channelFactory::forDescriptor,
-              processorCache);
+              apiServiceDescriptor, channelFactory::forDescriptor, processorCache);
       StreamObserver<WorkerStatusRequest> requestObserver = requestObservers.take();
       requestObserver.onNext(WorkerStatusRequest.newBuilder().setId("id").build());
       requestObserver.onCompleted();
