@@ -86,6 +86,14 @@ def looks_like_json(s):
   return re.match(r'\s*\{.*\}\s*$', s)
 
 
+APACHE_BEAM_DOCKER_IMAGE_PREFIX = 'apache/beam'
+
+
+def is_apache_beam_container(container_image):
+  return container_image and container_image.startswith(
+      APACHE_BEAM_DOCKER_IMAGE_PREFIX)
+
+
 class Environment(object):
   """Abstract base class for environments.
 
@@ -250,10 +258,6 @@ class DockerEnvironment(Environment):
     return self.__class__ == other.__class__ \
            and self.container_image == other.container_image
 
-  def __ne__(self, other):
-    # TODO(BEAM-5949): Needed for Python 2 compatibility.
-    return not self == other
-
   def __hash__(self):
     return hash((self.__class__, self.container_image))
 
@@ -313,7 +317,8 @@ class DockerEnvironment(Environment):
         (sys.version_info[0], sys.version_info[1]))
 
     image = (
-        'apache/beam_python{version_suffix}_sdk:{tag}'.format(
+        APACHE_BEAM_DOCKER_IMAGE_PREFIX +
+        '_python{version_suffix}_sdk:{tag}'.format(
             version_suffix=version_suffix, tag=sdk_version))
     logging.info('Default Python SDK image for environment is %s' % (image))
     return image
@@ -342,10 +347,6 @@ class ProcessEnvironment(Environment):
     return self.__class__ == other.__class__ \
       and self.command == other.command and self.os == other.os \
       and self.arch == other.arch and self.env == other.env
-
-  def __ne__(self, other):
-    # TODO(BEAM-5949): Needed for Python 2 compatibility.
-    return not self == other
 
   def __hash__(self):
     # type: () -> int
@@ -441,10 +442,6 @@ class ExternalEnvironment(Environment):
     return self.__class__ == other.__class__ and self.url == other.url \
       and self.params == other.params
 
-  def __ne__(self, other):
-    # TODO(BEAM-5949): Needed for Python 2 compatibility.
-    return not self == other
-
   def __hash__(self):
     # type: () -> int
     return hash((
@@ -508,10 +505,6 @@ class EmbeddedPythonEnvironment(Environment):
   def __eq__(self, other):
     return self.__class__ == other.__class__
 
-  def __ne__(self, other):
-    # TODO(BEAM-5949): Needed for Python 2 compatibility.
-    return not self == other
-
   def __hash__(self):
     # type: () -> int
     return hash(self.__class__)
@@ -553,10 +546,6 @@ class EmbeddedPythonGrpcEnvironment(Environment):
     return self.__class__ == other.__class__ \
            and self.state_cache_size == other.state_cache_size \
            and self.data_buffer_time_limit_ms == other.data_buffer_time_limit_ms
-
-  def __ne__(self, other):
-    # TODO(BEAM-5949): Needed for Python 2 compatibility.
-    return not self == other
 
   def __hash__(self):
     # type: () -> int
@@ -645,10 +634,6 @@ class SubprocessSDKEnvironment(Environment):
   def __eq__(self, other):
     return self.__class__ == other.__class__ \
            and self.command_string == other.command_string
-
-  def __ne__(self, other):
-    # TODO(BEAM-5949): Needed for Python 2 compatibility.
-    return not self == other
 
   def __hash__(self):
     # type: () -> int

@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-
 import sys
 import unittest
 
@@ -151,6 +149,24 @@ class DeferredFrameTest(unittest.TestCase):
     })
     self._run_test(new_column, df)
 
+  def test_tz_localize_ambiguous_series(self):
+    # This replicates a tz_localize doctest:
+    #   s.tz_localize('CET', ambiguous=np.array([True, True, False]))
+    # But using a DeferredSeries instead of a np array
+
+    s = pd.Series(
+        range(3),
+        index=pd.DatetimeIndex([
+            '2018-10-28 01:20:00', '2018-10-28 02:36:00', '2018-10-28 03:46:00'
+        ]))
+    ambiguous = pd.Series([True, True, False], index=s.index)
+
+    self._run_test(
+        lambda s,
+        ambiguous: s.tz_localize('CET', ambiguous=ambiguous),
+        s,
+        ambiguous)
+
   def test_groupby(self):
     df = pd.DataFrame({
         'group': ['a' if i % 5 == 0 or i % 3 == 0 else 'b' for i in range(100)],
@@ -237,6 +253,12 @@ class DeferredFrameTest(unittest.TestCase):
         expect_error=True)
     self._run_test(
         lambda df: df.groupby('bad').foo.sum(), df, expect_error=True)
+
+  def test_groupby_callable(self):
+    df = GROUPBY_DF
+
+    self._run_test(lambda df: df.groupby(lambda x: x % 2).foo.sum(), df)
+    self._run_test(lambda df: df.groupby(lambda x: x % 5).median(), df)
 
   def test_set_index(self):
     df = pd.DataFrame({

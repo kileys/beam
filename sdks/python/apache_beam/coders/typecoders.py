@@ -66,8 +66,6 @@ See apache_beam.typehints.decorators module for more details.
 
 # pytype: skip-file
 
-from __future__ import absolute_import
-
 from builtins import object
 from typing import Any
 from typing import Dict
@@ -135,10 +133,10 @@ class CoderRegistry(object):
         raise RuntimeError(
             'Coder registry has no fallback coder. This can happen if the '
             'fast_coders module could not be imported.')
-      if isinstance(
-          typehint,
-          (typehints.IterableTypeConstraint, typehints.ListConstraint)):
+      if isinstance(typehint, typehints.IterableTypeConstraint):
         return coders.IterableCoder.from_type_hint(typehint, self)
+      elif isinstance(typehint, typehints.ListConstraint):
+        return coders.ListCoder.from_type_hint(typehint, self)
       elif typehint is None:
         # In some old code, None is used for Any.
         # TODO(robertwb): Clean this up.
