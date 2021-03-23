@@ -17,9 +17,13 @@
  */
 package org.apache.beam.fn.harness.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Function;
 import org.apache.beam.fn.harness.control.ProcessBundleHandler.BundleProcessor;
@@ -34,6 +38,7 @@ import org.apache.beam.sdk.fn.stream.OutboundObserverFactory;
 import org.apache.beam.vendor.grpc.v1p26p0.io.grpc.ManagedChannel;
 import org.apache.beam.vendor.grpc.v1p26p0.io.grpc.stub.StreamObserver;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.annotations.VisibleForTesting;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,26 +59,89 @@ public class BeamFnStatusClient {
     this.processBundleCache = processBundleCache;
   }
 
-  void threadDump(StringJoiner trace) {
+  /**
+   * Class representing the execution state of a thread.
+   *
+   * <p>Can be used in hash maps.
+   */
+  static class Stack {
+    final StackTraceElement[] elements;
+    final Thread.State state;
+
+    Stack(StackTraceElement[] elements, Thread.State state) {
+      this.elements = elements;
+      this.state = state;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(Arrays.deepHashCode(elements), state);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+      if (other == this) {
+        return true;
+      } else if (!(other instanceof Stack)) {
+        return false;
+      } else {
+        Stack that = (Stack) other;
+        return state == that.state && Arrays.deepEquals(elements, that.elements);
+      }
+    }
+  }
+
+  String getThreadDump() {
+    StringJoiner trace = new StringJoiner("\n");
     trace.add("========== THREAD DUMP ==========");
-    Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
-    threads
-        .entrySet()
+    // filter duplicates.
+    Map<Stack, List<String>> stacks = new HashMap<>();
+    Thread.getAllStackTraces()
         .forEach(
+            (thread, elements) -> {
+              if (thread != Thread.currentThread()) {
+                Stack stack = new Stack(elements, thread.getState());
+                stacks.putIfAbsent(stack, new ArrayList<>());
+                stacks.get(stack).add(thread.toString());
+              }
+            });
+
+    // Stacks with more threads are printed first.
+    stacks.entrySet().stream()
+        .sorted(Comparator.comparingInt(entry -> -entry.getValue().size()))
+        .forEachOrdered(
             entry -> {
+              Stack stack = entry.getKey();
+              List<String> threads = entry.getValue();
               trace.add(
                   String.format(
-                      "%n--- Thread #%d name: %s ---",
-                      entry.getKey().getId(), entry.getKey().getName()));
-              Arrays.stream(entry.getValue()).map(StackTraceElement::toString).forEach(trace::add);
+                      "---- Threads (%d): %s State: %s Stack: ----",
+                      threads.size(), threads, stack.state));
+              Arrays.stream(stack.elements).map(StackTraceElement::toString).forEach(trace::add);
+              trace.add("\n");
             });
+    return trace.toString();
+  }
+
+  String getMemoryUsage() {
+    StringJoiner memory = new StringJoiner("\n");
+    memory.add("========== MEMORY USAGE ==========");
+    Runtime runtime = Runtime.getRuntime();
+    long maxMemory = runtime.maxMemory();
+    long totalMemory = runtime.totalMemory();
+    long usedMemory = totalMemory - runtime.freeMemory();
+    memory.add(
+        String.format(
+            "used/total/max = %d/%d/%d MB", usedMemory >> 20, totalMemory >> 20, maxMemory >> 20));
+    return memory.toString();
   }
 
   @VisibleForTesting
-  void activeProcessBundleState(StringJoiner activeBundlesState) {
+  String getActiveProcessBundleState() {
+    StringJoiner activeBundlesState = new StringJoiner("\n");
     activeBundlesState.add("========== ACTIVE PROCESSING BUNDLES ==========");
     if (processBundleCache.getActiveBundleProcessors().isEmpty()) {
-      activeBundlesState.add("No active processing bundles.\n");
+      activeBundlesState.add("No active processing bundles.");
     } else {
       processBundleCache.getActiveBundleProcessors().entrySet().stream()
           .sorted(
@@ -95,15 +163,18 @@ public class BeamFnStatusClient {
                         executionStateTracker.getMillisSinceLastTransition() / 1000.0));
               });
     }
+    return activeBundlesState.toString();
   }
 
   private class InboundObserver implements StreamObserver<BeamFnApi.WorkerStatusRequest> {
     @Override
     public void onNext(WorkerStatusRequest workerStatusRequest) {
       StringJoiner status = new StringJoiner("\n");
-      activeProcessBundleState(status);
+      status.add(getMemoryUsage());
       status.add("\n");
-      threadDump(status);
+      status.add(getActiveProcessBundleState());
+      status.add("\n");
+      status.add(getThreadDump());
       outboundObserver.onNext(
           WorkerStatusResponse.newBuilder()
               .setId(workerStatusRequest.getId())
@@ -114,6 +185,7 @@ public class BeamFnStatusClient {
     @Override
     public void onError(Throwable t) {
       LOG.error("Error getting SDK harness status", t);
+      outboundObserver.onError(t);
     }
 
     @Override

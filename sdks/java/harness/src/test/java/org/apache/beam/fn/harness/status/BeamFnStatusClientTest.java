@@ -90,7 +90,7 @@ public class BeamFnStatusClientTest {
             OutboundObserverFactory.trivial(),
             handler.getBundleProcessorCache());
     StringJoiner joiner = new StringJoiner("\n");
-    client.activeProcessBundleState(joiner);
+    joiner.add(client.getActiveProcessBundleState());
     String actualState = joiner.toString();
 
     List<String> expectedInstructions = new ArrayList<>();
