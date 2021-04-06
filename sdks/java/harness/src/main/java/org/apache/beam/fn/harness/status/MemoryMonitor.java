@@ -599,13 +599,17 @@ public class MemoryMonitor implements Runnable {
     Object[] parameters = {fileName.getPath(), liveObjectsOnly};
     String[] signatures = {String.class.getName(), boolean.class.getName()};
     mbs.invoke(oname, "dumpHeap", parameters, signatures);
-
-    Files.setPosixFilePermissions(
-        fileName.toPath(),
-        ImmutableSet.of(
-            PosixFilePermission.OWNER_READ,
-            PosixFilePermission.GROUP_READ,
-            PosixFilePermission.OTHERS_READ));
+    
+    if (java.nio.file.FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+      Files.setPosixFilePermissions(
+          fileName.toPath(),
+          ImmutableSet.of(
+              PosixFilePermission.OWNER_READ,
+              PosixFilePermission.GROUP_READ,
+              PosixFilePermission.OTHERS_READ));
+    } else {
+      fileName.setReadable(true, true);
+    }
 
     LOG.warn("Heap dumped to {}", fileName);
 
