@@ -146,7 +146,6 @@ class NexmarkBuilder {
         switches('-x testJar')
         switches('-x classes')
         switches('-x testClasses')
-        switches("-Djava.specification.version=${JAVA_11_RUNTIME_VERSION}")
         switches("-Dorg.gradle.java.home=/usr/local/openjdk-8")
         if (jobSpecificSwitches != null) {
           jobSpecificSwitches.each {
