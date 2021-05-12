@@ -144,7 +144,7 @@ class NexmarkBuilder {
         switches('"-x compileTestJava"')
         switches('"-x jar"')
         switches('"-x testJar"')
-        switches('"-x classes')
+        switches('"-x classes"')
         switches('"-x testClasses"')
         switches("-Dorg.gradle.java.home=/usr/local/openjdk-8")
         if (jobSpecificSwitches != null) {
