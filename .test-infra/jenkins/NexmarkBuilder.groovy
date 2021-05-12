@@ -135,8 +135,8 @@ class NexmarkBuilder {
       gradle {
         rootBuildScriptDir(commonJobProperties.checkoutDir)
         switches('--info')
-        switches('-x shadowJar')
-        switches('-x shadowTestJar')
+//        switches('-x shadowJar')
+//        switches('-x shadowTestJar')
         switches('-x compileJava')
         switches('-x compileTestJava')
 //        switches('-x jar')
