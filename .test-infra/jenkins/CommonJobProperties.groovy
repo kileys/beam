@@ -56,13 +56,13 @@ class CommonJobProperties {
     context.scm {
       git {
         remote {
-          github("apache/beam")
+          github("kileys/beam")
           // Single quotes here mean that ${ghprbPullId} is not interpolated and instead passed
           // through to Jenkins where it refers to the environment variable.
           refspec('+refs/heads/*:refs/remotes/origin/* ' +
               '+refs/pull/${ghprbPullId}/*:refs/remotes/origin/pr/${ghprbPullId}/*')
         }
-        branch('${sha1}')
+        branch('jc')
         extensions {
           wipeOutWorkspace()
           relativeTargetDirectory(checkoutDir)
