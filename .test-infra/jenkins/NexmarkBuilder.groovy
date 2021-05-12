@@ -118,8 +118,8 @@ class NexmarkBuilder {
       // Build with Java 8
       gradle {
         rootBuildScriptDir(commonJobProperties.checkoutDir)
-        tasks(':sdks:java:testing:nexmark:shadowJar')
-        tasks(':sdks:java:testing:nexmark:shadowTestJar')
+        tasks(':sdks:java:testing:nexmark:jar')
+        tasks(':sdks:java:testing:nexmark:testJar')
         commonJobProperties.setGradleSwitches(delegate)
         switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
         switches("-Pnexmark.args=\"${parseOptions(options)}\"")
@@ -138,8 +138,6 @@ class NexmarkBuilder {
         commonJobProperties.setGradleSwitches(delegate)
         switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
         switches("-Pnexmark.args=\"${parseOptions(options)}\"")
-        switches('-x shadowJar')
-        switches('-x shadowTestJar')
         switches('-x compileJava')
         switches('-x compileTestJava')
         switches('-x jar')
