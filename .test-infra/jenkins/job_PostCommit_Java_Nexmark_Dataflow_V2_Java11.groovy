@@ -29,6 +29,7 @@ import static NexmarkDatabaseProperties.nexmarkBigQueryArgs
 import static NexmarkDatabaseProperties.nexmarkInfluxDBArgs
 
 def final JOB_SPECIFIC_OPTIONS = [
+        'region' : 'us-central1',
   'exportSummaryToBigQuery' : false,
   'region' : 'us-central1',
   'suite' : 'STRESS',
@@ -36,6 +37,7 @@ def final JOB_SPECIFIC_OPTIONS = [
   'maxNumWorkers' : 4,
   'autoscalingAlgorithm' : 'NONE',
   'nexmarkParallel' : 16,
+        'region' : 'us-central1',
   'enforceEncodability' : true,
   'enforceImmutability' : true,
   'influxTags' : '{\\\"runnerVersion\\\":\\\"V2\\\",\\\"javaVersion\\\":\\\"11\\\"}'
