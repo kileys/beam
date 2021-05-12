@@ -123,7 +123,7 @@ class NexmarkBuilder {
         commonJobProperties.setGradleSwitches(delegate)
         switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
         switches("-Pnexmark.args=\"${parseOptions(options)}\"")
-        switches("-Dorg.gradle.java.home=${commonJobProperties.JAVA_8_HOME}")
+        switches("-Dorg.gradle.java.home=/usr/local/openjdk-8/bin/java")
         if (jobSpecificSwitches != null) {
           jobSpecificSwitches.each {
             switches(it)
@@ -147,7 +147,7 @@ class NexmarkBuilder {
         switches('-x classes')
         switches('-x testClasses')
         switches("-Djava.specification.version=${JAVA_11_RUNTIME_VERSION}")
-        switches("-Dorg.gradle.java.home=${commonJobProperties.JAVA_11_HOME}")
+        switches("-Dorg.gradle.java.home=/usr/local/openjdk-11/bin/java")
         if (jobSpecificSwitches != null) {
           jobSpecificSwitches.each {
             switches(it)
