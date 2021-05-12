@@ -38,7 +38,7 @@ PostcommitJobBuilder.postCommitJob('beam_PostCommit_Java_ValidatesRunner_Dataflo
           rootBuildScriptDir(commonJobProperties.checkoutDir)
           tasks(':runners:google-cloud-dataflow-java:testJar')
           tasks(':runners:google-cloud-dataflow-java:worker:legacy-worker:shadowJar')
-          switches("-Dorg.gradle.java.home=${JAVA_8_HOME}")
+          switches("-Dorg.gradle.java.home=/usr/local/openjdk-8/bin/java")
         }
 
         gradle {
@@ -52,7 +52,7 @@ PostcommitJobBuilder.postCommitJob('beam_PostCommit_Java_ValidatesRunner_Dataflo
           switches('-x testJar')
           switches('-x classes')
           switches('-x testClasses')
-          switches("-Dorg.gradle.java.home=${JAVA_11_HOME}")
+          switches("-Dorg.gradle.java.home=/usr/local/openjdk-11/bin/java")
 
           commonJobProperties.setGradleSwitches(delegate, 3 * Runtime.runtime.availableProcessors())
         }
