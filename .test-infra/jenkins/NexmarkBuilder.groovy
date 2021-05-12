@@ -119,10 +119,10 @@ class NexmarkBuilder {
       gradle {
         rootBuildScriptDir(commonJobProperties.checkoutDir)
         tasks(':sdks:java:testing:nexmark:jar')
+        tasks(':sdks:java:testing:nexmark:testJar')
         commonJobProperties.setGradleSwitches(delegate)
         switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
         switches("-Pnexmark.args=\"${parseOptions(options)}\"")
-        switches("-xtest")
         switches("-Dorg.gradle.java.home=${commonJobProperties.JAVA_8_HOME}")
         if (jobSpecificSwitches != null) {
           jobSpecificSwitches.each {
