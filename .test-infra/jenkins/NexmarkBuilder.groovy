@@ -134,18 +134,18 @@ class NexmarkBuilder {
       // Run with Java 11
       gradle {
         rootBuildScriptDir(commonJobProperties.checkoutDir)
+        switches('-x shadowJar')
+        switches('-x shadowTestJar')
+        switches('-x compileJava')
+        switches('-x compileTestJava')
+        switches('-x jar')
+        switches('-x testJar')
+        switches('-x classes')
+        switches('-x testClasses')
         tasks(':sdks:java:testing:nexmark:run')
         commonJobProperties.setGradleSwitches(delegate)
         switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
         switches("-Pnexmark.args=\"${parseOptions(options)}\"")
-//        switches('"-x shadowJar"')
-//        switches('"-x shadowTestJar"')
-        switches('"-x compileJava"')
-        switches('"-x compileTestJava"')
-        switches('"-x jar"')
-        switches('"-x testJar"')
-        switches('"-x classes"')
-        switches('"-x testClasses"')
         switches("-Dorg.gradle.java.home=/usr/local/openjdk-8")
         if (jobSpecificSwitches != null) {
           jobSpecificSwitches.each {
