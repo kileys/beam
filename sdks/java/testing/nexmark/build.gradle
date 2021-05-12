@@ -125,10 +125,10 @@ task run(type: JavaExec) {
 
   if (isDataflowRunner) {
     if (isDataflowRunnerV2) {
-      jar.enabled = false
-      testJar.enabled = false
-      classes.enabled = false
-      testClasses.enabled = false
+//      jar.enabled = false
+//      testJar.enabled = false
+//      classes.enabled = false
+//      testClasses.enabled = false
 //        switches('-x shadowJar')
 //        switches('-x shadowTestJar')
 //      switches('-x compileJava')
