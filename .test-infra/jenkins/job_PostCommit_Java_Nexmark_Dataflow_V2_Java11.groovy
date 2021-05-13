@@ -31,7 +31,6 @@ import static NexmarkDatabaseProperties.nexmarkInfluxDBArgs
 def final JOB_SPECIFIC_OPTIONS = [
   'influxTags' : '{\\\"runnerVersion\\\":\\\"V2\\\",\\\"javaVersion\\\":\\\"11\\\"}',
   'exportSummaryToBigQuery' : false,
-  'region' : 'us-central1',
   'suite' : 'STRESS',
   'numWorkers' : 4,
   'maxNumWorkers' : 4,
