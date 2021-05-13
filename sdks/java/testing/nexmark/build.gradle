@@ -140,10 +140,12 @@ task run(type: JavaExec) {
 
       // NOTE: We only add to the test class dirs to ensure that the direct runner
       // tests (i.e., those from this subproject) get scanned.
-      classpath += files(project(":runners:google-cloud-dataflow-java").sourceSets.main)
-//      classpath += files(project(":runners:core-java").sourceSets.main)
-      classpath += files(project(":sdks:java:core").sourceSets.main)
-      // finalizedBy ":runners:google-cloud-dataflow-java:cleanUpDockerImages"
+//      configurations.gradleRun {
+//        classpath += files(project(":runners:google-cloud-dataflow-java").sourceSets.main)
+////      classpath += files(project(":runners:core-java").sourceSets.main)
+//        classpath += files(project(":sdks:java:core").sourceSets.main)
+//        // finalizedBy ":runners:google-cloud-dataflow-java:cleanUpDockerImages"
+//      }
     } else {
       dependsOn ":runners:google-cloud-dataflow-java:worker:legacy-worker:shadowJar"
 
@@ -163,5 +165,9 @@ task run(type: JavaExec) {
   print  nexmarkArgsList.toArray()
   main = "org.apache.beam.sdk.nexmark.Main"
   classpath = configurations.gradleRun
+  println "testing kiley"
+  classpath.each {
+    println it
+  }
   args nexmarkArgsList.toArray()
 }
