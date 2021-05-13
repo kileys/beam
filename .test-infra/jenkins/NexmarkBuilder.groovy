@@ -115,39 +115,14 @@ class NexmarkBuilder {
     context.steps {
       shell("echo \"*** RUN ${title} with Java 11***\"")
 
-      // Build with Java 8
-      gradle {
-        rootBuildScriptDir(commonJobProperties.checkoutDir)
-        tasks(':sdks:java:testing:nexmark:jar')
-        tasks(':sdks:java:testing:nexmark:testJar')
-        commonJobProperties.setGradleSwitches(delegate)
-        switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
-        switches("-Pnexmark.args=\"${parseOptions(options)}\"")
-        switches("-Dorg.gradle.java.home=/usr/local/openjdk-8")
-        if (jobSpecificSwitches != null) {
-          jobSpecificSwitches.each {
-            switches(it)
-          }
-        }
-      }
-
       // Run with Java 11
       gradle {
         rootBuildScriptDir(commonJobProperties.checkoutDir)
         switches('--info')
-//        switches('-x shadowJar')
-//        switches('-x shadowTestJar')
-        switches('-x compileJava')
-        switches('-x compileTestJava')
-//        switches('-x jar')
-//        switches('-x testJar')
-//        switches('-x classes')
-//        switches('-x testClasses')
-        tasks(':sdks:java:testing:nexmark:run')
+        tasks(':sdks:java:testing:nexmark:run2')
         commonJobProperties.setGradleSwitches(delegate)
         switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
         switches("-Pnexmark.args=\"${parseOptions(options)}\"")
-        switches("-Dorg.gradle.java.home=/usr/local/openjdk-8")
         if (jobSpecificSwitches != null) {
           jobSpecificSwitches.each {
             switches(it)
