@@ -300,7 +300,7 @@ public class PipelineOptionsFactory {
       // Attempt to parse the arguments into the set of initial options to use
       if (args != null) {
         ListMultimap<String, String> options = parseCommandLine(args, strictParsing);
-        LOG.debug("Provided Arguments: {}", options);
+        LOG.warn("Provided Arguments: {}", options);
         printHelpUsageAndExitIfNeeded(options, System.out, true /* exit */);
         initialOptions = parseObjects(klass, options, strictParsing);
       }

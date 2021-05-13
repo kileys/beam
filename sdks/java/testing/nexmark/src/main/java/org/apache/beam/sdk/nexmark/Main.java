@@ -104,6 +104,7 @@ public class Main {
 
   /** Entry point. */
   void runAll(String[] args) throws IOException {
+
     NexmarkOptions options =
         PipelineOptionsFactory.fromArgs(args).withValidation().as(NexmarkOptions.class);
 
