@@ -120,23 +120,12 @@ if (shouldProvideSpark) {
 //       Specify the command line for invoking org.apache.beam.sdk.nexmark.Main
 task run(type: JavaExec) {
   def nexmarkArgsStr =  project.findProperty(nexmarkArgsProperty) ?: ""
+  print nexmarkArgsStr
   def nexmarkArgsList = new ArrayList<String>()
   Collections.addAll(nexmarkArgsList, nexmarkArgsStr.split())
 
   if (isDataflowRunner) {
     if (isDataflowRunnerV2) {
-//      jar.enabled = false
-//      testJar.enabled = false
-//      classes.enabled = false
-//      testClasses.enabled = false
-//        switches('-x shadowJar')
-//        switches('-x shadowTestJar')
-//      switches('-x compileJava')
-//      switches('-x compileTestJava')
-////        switches('-x jar')
-////        switches('-x testJar')
-////        switches('-x classes')
-////        switches('-x testClasses')
       // dependsOn ":runners:google-cloud-dataflow-java:buildAndPushDockerContainer"
       nexmarkArgsList.add("--experiments=beam_fn_api,use_unified_worker,use_runner_v2,shuffle_mode=appliance")
       def sdkContainerImage = project.findProperty('sdkContainerImage') ?: project(":runners:google-cloud-dataflow-java").dockerImageName
@@ -164,7 +153,7 @@ task run(type: JavaExec) {
       }
     }
   }
-
+  print  nexmarkArgsList.toArray()
   main = "org.apache.beam.sdk.nexmark.Main"
   classpath = configurations.gradleRun
   args nexmarkArgsList.toArray()

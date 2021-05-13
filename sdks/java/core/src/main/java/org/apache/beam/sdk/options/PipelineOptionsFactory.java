@@ -1600,6 +1600,7 @@ public class PipelineOptionsFactory {
                 .collect(Collectors.toSet()));
     for (PropertyDescriptor descriptor : propertyDescriptors) {
       propertyNamesToGetters.put(descriptor.getName(), descriptor.getReadMethod());
+      LOG.warn("kiley " + descriptor.getName());
     }
     Map<String, Object> convertedOptions = Maps.newHashMap();
     for (final Map.Entry<String, Collection<String>> entry : options.asMap().entrySet()) {
