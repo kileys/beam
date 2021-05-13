@@ -34,7 +34,6 @@ def final JOB_SPECIFIC_OPTIONS = [
   'suite' : 'STRESS',
   'numWorkers' : 4,
   'maxNumWorkers' : 4,
-  'autoscalingAlgorithm' : 'NONE',
   'nexmarkParallel' : 16,
   'enforceEncodability' : true,
   'enforceImmutability' : true
