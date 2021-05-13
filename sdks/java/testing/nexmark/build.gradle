@@ -140,9 +140,9 @@ task run(type: JavaExec) {
 
       // NOTE: We only add to the test class dirs to ensure that the direct runner
       // tests (i.e., those from this subproject) get scanned.
-      classesDirs += files(project(":runners:google-cloud-dataflow-java").sourceSets.main.output.classesDirs)
-      classesDirs += files(project(":runners:core-java").sourceSets.main.output.classesDirs)
-      classesDirs += files(project(":sdks:java:core").sourceSets.main.output.classesDirs)
+      classpath += files(project(":runners:google-cloud-dataflow-java").sourceSets.main)
+      classpath += files(project(":runners:core-java").sourceSets.main)
+      classpath += files(project(":sdks:java:core").sourceSets.main)
       // finalizedBy ":runners:google-cloud-dataflow-java:cleanUpDockerImages"
     } else {
       dependsOn ":runners:google-cloud-dataflow-java:worker:legacy-worker:shadowJar"
