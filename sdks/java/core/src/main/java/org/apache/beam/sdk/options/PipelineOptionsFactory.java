@@ -1605,6 +1605,7 @@ public class PipelineOptionsFactory {
     Map<String, Object> convertedOptions = Maps.newHashMap();
     for (final Map.Entry<String, Collection<String>> entry : options.asMap().entrySet()) {
       try {
+        LOG.warn("entry kiley " + entry.getKey() + " " + entry.getValue().toString());
         // Search for close matches for missing properties.
         // Either off by one or off by two character errors.
         if (!propertyNamesToGetters.containsKey(entry.getKey())) {
