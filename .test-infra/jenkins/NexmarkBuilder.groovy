@@ -98,6 +98,7 @@ class NexmarkBuilder {
           rootBuildScriptDir(commonJobProperties.checkoutDir)
           tasks(':sdks:java:testing:nexmark:run')
           commonJobProperties.setGradleSwitches(delegate)
+          switches('--info')
           switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
           switches("-Pnexmark.args=\"${parseOptions(options)}\"")
           if (jobSpecificSwitches != null) {
@@ -120,6 +121,7 @@ class NexmarkBuilder {
         rootBuildScriptDir(commonJobProperties.checkoutDir)
         tasks(':sdks:java:testing:nexmark:runJava11')
         commonJobProperties.setGradleSwitches(delegate)
+        switches('--info')
         switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
         switches("-Pnexmark.args=\"${parseOptions(options)}\"")
         if (jobSpecificSwitches != null) {
