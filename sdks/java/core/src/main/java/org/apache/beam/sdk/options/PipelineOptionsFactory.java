@@ -1634,6 +1634,7 @@ public class PipelineOptionsFactory {
         // Only allow empty argument values for String, String Array, and Collection<String>.
         Class<?> returnType = method.getReturnType();
         JavaType type = MAPPER.getTypeFactory().constructType(method.getGenericReturnType());
+        LOG.warn("kiley runners " + cache.getSupportedRunners().toString());
         if ("runner".equals(entry.getKey())) {
           String runner = Iterables.getOnlyElement(entry.getValue());
           final Map<String, Class<? extends PipelineRunner<?>>> pipelineRunners =
