@@ -116,9 +116,10 @@ def getNexmarkArgs = {
 
   if (isDataflowRunner) {
     if (isDataflowRunnerV2) {
-      nexmarkArgsList.add("--experiments=beam_fn_api,use_unified_worker,use_runner_v2,shuffle_mode=appliance")
       def sdkContainerImage = project.findProperty('sdkContainerImage') ?: project(":runners:google-cloud-dataflow-java").dockerImageName
       nexmarkArgsList.add("--sdkContainerImage=${sdkContainerImage}")
+
+      nexmarkArgsList.add("--experiments=beam_fn_api,use_unified_worker,use_runner_v2,shuffle_mode=service,worker_harness_container_image=${sdkContainerImage}")
       // TODO(BEAM-12295) enable all queries once issues with runner V2 is fixed.
       if (nexmarkArgsList.contains("--streaming=true")) {
         nexmarkArgsList.add("--skipQueries=AVERAGE_PRICE_FOR_CATEGORY,AVERAGE_SELLING_PRICE_BY_SELLER,WINNING_BIDS,BOUNDED_SIDE_INPUT_JOIN,SESSION_SIDE_INPUT_JOIN,PORTABILITY_BATCH") // 4, 6, 9, 13, 14, 15

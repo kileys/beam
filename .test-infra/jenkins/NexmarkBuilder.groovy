@@ -91,20 +91,23 @@ class NexmarkBuilder {
     if (javaRuntimeVersion == JAVA_11_RUNTIME_VERSION) {
       java11Suite(context, title, runner, sdk, options, jobSpecificSwitches)
     } else {
-      InfluxDBCredentialsHelper.useCredentials(context)
-      context.steps {
-        shell("echo \"*** RUN ${title} ***\"")
-        gradle {
-          rootBuildScriptDir(commonJobProperties.checkoutDir)
-          tasks(':sdks:java:testing:nexmark:run')
-          commonJobProperties.setGradleSwitches(delegate)
-          switches('--info')
-          switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
-          switches("-Pnexmark.args=\"${parseOptions(options)}\"")
-          if (jobSpecificSwitches != null) {
-            jobSpecificSwitches.each {
-              switches(it)
-            }
+      java8Suite(context, title, runner, sdk, options, jobSpecificSwitches)
+    }
+  }
+
+  static void java8Suite(context, String title, Runner runner, SDK sdk, Map<String, Object> options, List<String> jobSpecificSwitches) {
+    InfluxDBCredentialsHelper.useCredentials(context)
+    context.steps {
+      shell("echo \"*** RUN ${title} with Java 8 ***\"")
+      gradle {
+        rootBuildScriptDir(commonJobProperties.checkoutDir)
+        tasks(':sdks:java:testing:nexmark:run')
+        commonJobProperties.setGradleSwitches(delegate)
+        switches("-Pnexmark.runner=${runner.getDependencyBySDK(sdk)}")
+        switches("-Pnexmark.args=\"${parseOptions(options)}\"")
+        if (jobSpecificSwitches != null) {
+          jobSpecificSwitches.each {
+            switches(it)
           }
         }
       }
