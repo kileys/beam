@@ -51,8 +51,7 @@ NoPhraseTriggeringPostCommitBuilder.postCommitJob('beam_PostCommit_Java_Nexmark_
       description('Runs the Nexmark suite on the Dataflow runner V2 on Java 11.')
 
     // Set common parameters.
-    commonJobProperties.setTopLevelMainJobProperties(delegate, 'master', 240)
-    Map<String, Object> options = getFullOptions(jobSpecificOptions, runner, triggeringContext)
+    commonJobProperties.setTopLevelMainJobProperties(delegate, 'master', 240)\
 
       Nexmark.nonQueryLanguageJobs(delegate, Runner.DATAFLOW, SDK.JAVA, JOB_SPECIFIC_OPTIONS, TriggeringContext.POST_COMMIT, JOB_SPECIFIC_SWITCHES, Nexmark.JAVA_11_RUNTIME_VERSION)
     }
