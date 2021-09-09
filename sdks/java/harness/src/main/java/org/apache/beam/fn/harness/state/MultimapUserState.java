@@ -258,7 +258,7 @@ public class MultimapUserState<K, V> {
     }
   }
 
-  private Iterable<V> getPersistedValues(K key) {
+  private Iterable<V> getPersistedValues(@NonNull K key) {
     if (negativeCache.contains(key)) {
       return Collections.emptyList();
     }
