@@ -150,15 +150,13 @@ public class MultimapUserState<K, V> {
         !isClosed,
         "Multimap user state is no longer usable because it is closed for %s",
         keysStateRequest.getStateKey());
-    Collection<K> pendingKeys =
-        Collections.unmodifiableCollection(Sets.newHashSet(pendingAdds.keySet()));
     if (isCleared) {
-      return pendingKeys;
+      return Collections.unmodifiableCollection(Sets.newHashSet(pendingAdds.keySet()));
     }
 
     Set<K> keys = Sets.newHashSet(getPersistedKeys());
-    keys.removeAll(Sets.newHashSet(pendingRemoves));
-    keys.addAll(pendingKeys);
+    keys.removeAll(pendingRemoves);
+    keys.addAll(pendingAdds.keySet());
     return Collections.unmodifiableCollection(keys);
   }
 
