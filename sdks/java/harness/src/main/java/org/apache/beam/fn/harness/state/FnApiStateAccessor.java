@@ -360,12 +360,12 @@ public class FnApiStateAccessor<K> implements SideInputReader, StateBinder {
 
                   @Override
                   public ReadableState<Boolean> addIfAbsent(T t) {
-                    Iterable<Void> values = impl.get(t);
-                    if (Iterables.isEmpty(values)) {
+                    boolean isEmpty = Iterables.isEmpty(impl.get(t));
+                    if (isEmpty) {
                       impl.put(t, null);
                     }
                     // TODO: Support prefetching.
-                    return ReadableStates.immediate(Iterables.isEmpty(values));
+                    return ReadableStates.immediate(isEmpty);
                   }
 
                   @Override
@@ -383,7 +383,7 @@ public class FnApiStateAccessor<K> implements SideInputReader, StateBinder {
                   public ReadableState<Boolean> isEmpty() {
                     return new ReadableState<Boolean>() {
                       @Override
-                      public @Nullable Boolean read() {
+                      public Boolean read() {
                         return Iterables.isEmpty(impl.keys());
                       }
 
@@ -396,7 +396,7 @@ public class FnApiStateAccessor<K> implements SideInputReader, StateBinder {
                   }
 
                   @Override
-                  public @Nullable Iterable<T> read() {
+                  public Iterable<T> read() {
                     return impl.keys();
                   }
 
@@ -529,7 +529,7 @@ public class FnApiStateAccessor<K> implements SideInputReader, StateBinder {
                   public ReadableState<Boolean> isEmpty() {
                     return new ReadableState<Boolean>() {
                       @Override
-                      public @Nullable Boolean read() {
+                      public Boolean read() {
                         return Iterables.isEmpty(keys().read());
                       }
 
