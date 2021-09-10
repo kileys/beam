@@ -709,7 +709,6 @@ message StateKey {
     bytes window = 3;
   }
 
-
   // Represents a request for an unordered set of values associated with a
   // specified user key and window for a PTransform. See
   // https://s.apache.org/beam-fn-state-api-and-bundle-processing for further
