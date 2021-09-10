@@ -17,17 +17,20 @@
  */
 package org.apache.beam.fn.harness.state;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.beam.model.fnexecution.v1.BeamFnApi.StateKey;
+import org.apache.beam.sdk.coders.NullableCoder;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
 import org.apache.beam.vendor.grpc.v1p36p0.com.google.protobuf.ByteString;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.ImmutableMap;
@@ -57,7 +60,7 @@ public class MultimapUserStateTest {
             encode(encodedKey),
             StringUtf8Coder.of(),
             StringUtf8Coder.of());
-    assertTrue(Iterables.isEmpty(userState.keys()));
+    assertThat(userState.keys(), is(emptyIterable()));
   }
 
   @Test
@@ -113,14 +116,14 @@ public class MultimapUserStateTest {
     Iterable<String> initValues = userState.get("A1");
     userState.clear();
     assertArrayEquals(new String[] {"V1", "V2"}, Iterables.toArray(initValues, String.class));
-    assertTrue(Iterables.isEmpty(userState.get("A1")));
-    assertTrue(Iterables.isEmpty(userState.keys()));
+    assertThat(userState.get("A1"), is(emptyIterable()));
+    assertThat(userState.keys(), is(emptyIterable()));
 
     userState.put("A1", "V1");
     userState.clear();
     assertArrayEquals(new String[] {"V1", "V2"}, Iterables.toArray(initValues, String.class));
-    assertTrue(Iterables.isEmpty(userState.get("A1")));
-    assertTrue(Iterables.isEmpty(userState.keys()));
+    assertThat(userState.get("A1"), is(emptyIterable()));
+    assertThat(userState.keys(), is(emptyIterable()));
 
     userState.asyncClose();
     assertThrows(IllegalStateException.class, () -> userState.clear());
@@ -191,6 +194,131 @@ public class MultimapUserStateTest {
   }
 
   @Test
+  public void testPutAfterRemove() throws Exception {
+    FakeBeamFnStateClient fakeClient =
+        new FakeBeamFnStateClient(
+            ImmutableMap.of(
+                createMultimapKeyStateKey(),
+                encode("A0"),
+                createMultimapValueStateKey("A0"),
+                encode("V1")));
+    MultimapUserState<String, String> userState =
+        new MultimapUserState<>(
+            fakeClient,
+            "instructionId",
+            pTransformId,
+            stateId,
+            encode(encodedWindow),
+            encode(encodedKey),
+            StringUtf8Coder.of(),
+            StringUtf8Coder.of());
+    userState.remove("A0");
+    userState.put("A0", "V2");
+    assertArrayEquals(new String[] {"V2"}, Iterables.toArray(userState.get("A0"), String.class));
+    userState.asyncClose();
+    Map<StateKey, ByteString> data = fakeClient.getData();
+    assertEquals(encode("V2"), data.get(createMultimapValueStateKey("A0")));
+  }
+
+  @Test
+  public void testPutAfterClear() throws Exception {
+    FakeBeamFnStateClient fakeClient =
+        new FakeBeamFnStateClient(
+            ImmutableMap.of(
+                createMultimapKeyStateKey(),
+                encode("A0"),
+                createMultimapValueStateKey("A0"),
+                encode("V1")));
+    MultimapUserState<String, String> userState =
+        new MultimapUserState<>(
+            fakeClient,
+            "instructionId",
+            pTransformId,
+            stateId,
+            encode(encodedWindow),
+            encode(encodedKey),
+            StringUtf8Coder.of(),
+            StringUtf8Coder.of());
+    userState.clear();
+    userState.put("A0", "V2");
+    assertArrayEquals(new String[] {"V2"}, Iterables.toArray(userState.get("A0"), String.class));
+  }
+
+  @Test
+  public void testRemoveBeforeClear() throws Exception {
+    FakeBeamFnStateClient fakeClient =
+        new FakeBeamFnStateClient(
+            ImmutableMap.of(
+                createMultimapKeyStateKey(),
+                encode("A0"),
+                createMultimapValueStateKey("A0"),
+                encode("V1")));
+    MultimapUserState<String, String> userState =
+        new MultimapUserState<>(
+            fakeClient,
+            "instructionId",
+            pTransformId,
+            stateId,
+            encode(encodedWindow),
+            encode(encodedKey),
+            StringUtf8Coder.of(),
+            StringUtf8Coder.of());
+    userState.remove("A0");
+    userState.clear();
+    userState.asyncClose();
+    // Clear takes precedence over specific key remove
+    assertThat(fakeClient.getCallCount(), is(1));
+  }
+
+  @Test
+  public void testPutBeforeClear() throws Exception {
+    FakeBeamFnStateClient fakeClient = new FakeBeamFnStateClient(Collections.emptyMap());
+    MultimapUserState<String, String> userState =
+        new MultimapUserState<>(
+            fakeClient,
+            "instructionId",
+            pTransformId,
+            stateId,
+            encode(encodedWindow),
+            encode(encodedKey),
+            StringUtf8Coder.of(),
+            StringUtf8Coder.of());
+    userState.put("A0", "V0");
+    userState.put("A1", "V1");
+    Iterable<String> values = userState.get("A1"); // fakeClient call = 1
+    userState.clear(); // fakeClient call = 2
+    assertArrayEquals(new String[] {"V1"}, Iterables.toArray(values, String.class));
+    userState.asyncClose();
+    // Clear takes precedence over puts
+    assertThat(fakeClient.getCallCount(), is(2));
+  }
+
+  @Test
+  public void testPutBeforeRemove() throws Exception {
+    FakeBeamFnStateClient fakeClient = new FakeBeamFnStateClient(Collections.emptyMap());
+    MultimapUserState<String, String> userState =
+        new MultimapUserState<>(
+            fakeClient,
+            "instructionId",
+            pTransformId,
+            stateId,
+            encode(encodedWindow),
+            encode(encodedKey),
+            StringUtf8Coder.of(),
+            StringUtf8Coder.of());
+    userState.put("A0", "V0");
+    userState.put("A1", "V1");
+    Iterable<String> values = userState.get("A1"); // fakeClient call = 1
+    userState.remove("A0"); // fakeClient call = 2
+    userState.remove("A1"); // fakeClient call = 3
+    assertArrayEquals(new String[] {"V1"}, Iterables.toArray(values, String.class));
+    userState.asyncClose();
+    assertThat(fakeClient.getCallCount(), is(3));
+    assertNull(fakeClient.getData().get(createMultimapValueStateKey("A0")));
+    assertNull(fakeClient.getData().get(createMultimapValueStateKey("A1")));
+  }
+
+  @Test
   public void testRemove() throws Exception {
     FakeBeamFnStateClient fakeClient =
         new FakeBeamFnStateClient(
@@ -215,7 +343,7 @@ public class MultimapUserStateTest {
 
     userState.remove("A1");
     assertArrayEquals(new String[] {"V1", "V2"}, Iterables.toArray(initValues, String.class));
-    assertTrue(Iterables.isEmpty(userState.keys()));
+    assertThat(userState.keys(), is(emptyIterable()));
     userState.asyncClose();
     assertThrows(IllegalStateException.class, () -> userState.remove("A1"));
   }
@@ -350,6 +478,50 @@ public class MultimapUserStateTest {
     assertNull(data.get(createMultimapValueStateKey("A0")));
     assertEquals(encode("V1", "V2", "V3"), data.get(createMultimapValueStateKey("A1")));
     assertEquals(encode("V1"), data.get(createMultimapValueStateKey("A2")));
+  }
+
+  @Test
+  public void testNullKeysAndValues() throws Exception {
+    FakeBeamFnStateClient fakeClient =
+        new FakeBeamFnStateClient(
+            ImmutableMap.of(
+                createMultimapKeyStateKey(),
+                encode("A1"),
+                createMultimapValueStateKey("A1"),
+                encode("V1", "V2")));
+    MultimapUserState<String, String> userState =
+        new MultimapUserState<>(
+            fakeClient,
+            "instructionId",
+            pTransformId,
+            stateId,
+            encode(encodedWindow),
+            encode(encodedKey),
+            NullableCoder.of(StringUtf8Coder.of()),
+            NullableCoder.of(StringUtf8Coder.of()));
+    userState.put(null, null);
+    userState.put(null, null);
+    userState.put(null, "V1");
+    assertArrayEquals(
+        new String[] {null, null, "V1"}, Iterables.toArray(userState.get(null), String.class));
+  }
+
+  @Test
+  public void testNegativeCache() throws Exception {
+    FakeBeamFnStateClient fakeClient = new FakeBeamFnStateClient(Collections.emptyMap());
+    MultimapUserState<String, String> userState =
+        new MultimapUserState<>(
+            fakeClient,
+            "instructionId",
+            pTransformId,
+            stateId,
+            encode(encodedWindow),
+            encode(encodedKey),
+            StringUtf8Coder.of(),
+            StringUtf8Coder.of());
+    userState.get("A1");
+    userState.get("A1");
+    assertThat(fakeClient.getCallCount(), is(1));
   }
 
   private StateKey createMultimapKeyStateKey() throws IOException {

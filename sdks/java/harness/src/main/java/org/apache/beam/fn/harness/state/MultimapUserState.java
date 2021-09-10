@@ -20,8 +20,12 @@ package org.apache.beam.fn.harness.state;
 import static org.apache.beam.vendor.guava.v26_0_jre.com.google.common.base.Preconditions.checkState;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.apache.beam.model.fnexecution.v1.BeamFnApi.StateAppendRequest;
@@ -32,9 +36,9 @@ import org.apache.beam.vendor.grpc.v1p36p0.com.google.protobuf.ByteString;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.ArrayListMultimap;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.Iterables;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.Lists;
+import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.Maps;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.Multimap;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.Sets;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -61,10 +65,10 @@ public class MultimapUserState<K, V> {
   private boolean isClosed;
   private boolean isCleared;
   // Pending updates to persistent storage
-  private Set<K> pendingRemoves = Sets.newHashSet();
-  private Multimap<K, V> pendingAdds = ArrayListMultimap.create();
+  private HashSet<K> pendingRemoves = Sets.newHashSet();
+  private HashMap<K, List<V>> pendingAdds = Maps.newHashMap();
   // Map keys with no values in persistent storage
-  private Set<K> negativeCache = Sets.newHashSet();
+  private HashSet<K> negativeCache = Sets.newHashSet();
   // Values retrieved from persistent storage
   private Multimap<K, V> persistedValues = ArrayListMultimap.create();
   private @Nullable Iterable<K> persistedKeys = null;
@@ -116,21 +120,23 @@ public class MultimapUserState<K, V> {
     persistedValues = ArrayListMultimap.create();
     persistedKeys = null;
     pendingRemoves = Sets.newHashSet();
-    pendingAdds = ArrayListMultimap.create();
+    pendingAdds = Maps.newHashMap();
+    negativeCache = Sets.newHashSet();
   }
 
   /*
    * Returns an iterable of the values associated with key in this multimap, if any.
    * If there are no values, this returns an empty collection, not null.
    */
-  public Iterable<V> get(@NonNull K key) {
+  public Iterable<V> get(K key) {
     checkState(
         !isClosed,
         "Multimap user state is no longer usable because it is closed for %s",
         keysStateRequest.getStateKey());
 
+    List<V> pendingAddValues = pendingAdds.getOrDefault(key, Collections.emptyList());
     Collection<V> pendingValues =
-        Collections.unmodifiableCollection(Lists.newArrayList(pendingAdds.get(key)));
+        Collections.unmodifiableCollection(pendingAddValues.subList(0, pendingAddValues.size()));
     if (isCleared || pendingRemoves.contains(key)) {
       return pendingValues;
     }
@@ -151,7 +157,7 @@ public class MultimapUserState<K, V> {
         "Multimap user state is no longer usable because it is closed for %s",
         keysStateRequest.getStateKey());
     if (isCleared) {
-      return Collections.unmodifiableCollection(Sets.newHashSet(pendingAdds.keySet()));
+      return Collections.unmodifiableCollection(Lists.newArrayList(pendingAdds.keySet()));
     }
 
     Set<K> keys = Sets.newHashSet(getPersistedKeys());
@@ -169,18 +175,19 @@ public class MultimapUserState<K, V> {
         !isClosed,
         "Multimap user state is no longer usable because it is closed for %s",
         keysStateRequest.getStateKey());
-    pendingAdds.put(key, value);
+    pendingAdds.putIfAbsent(key, new ArrayList<>());
+    pendingAdds.get(key).add(value);
   }
 
   /*
    * Removes all values for this key in the multimap.
    */
-  public void remove(@NonNull K key) {
+  public void remove(K key) {
     checkState(
         !isClosed,
         "Multimap user state is no longer usable because it is closed for %s",
         keysStateRequest.getStateKey());
-    pendingAdds.removeAll(key);
+    pendingAdds.remove(key);
     if (!isCleared) {
       pendingRemoves.add(key);
     }
@@ -195,10 +202,9 @@ public class MultimapUserState<K, V> {
         !isClosed,
         "Multimap user state is no longer usable because it is closed for %s",
         keysStateRequest.getStateKey());
-
+    isClosed = true;
     // Nothing to persist
     if (!isCleared && pendingRemoves.isEmpty() && pendingAdds.isEmpty()) {
-      isClosed = true;
       return;
     }
 
@@ -208,8 +214,7 @@ public class MultimapUserState<K, V> {
           keysStateRequest.toBuilder().setClear(StateClearRequest.getDefaultInstance()),
           new CompletableFuture<>());
     } else if (!pendingRemoves.isEmpty()) {
-      Iterable<K> removeKeys = Iterables.filter(getPersistedKeys(), pendingRemoves::contains);
-      for (K key : removeKeys) {
+      for (K key : pendingRemoves) {
         beamFnStateClient.handle(
             createUserStateRequest(key)
                 .toBuilder()
@@ -229,7 +234,6 @@ public class MultimapUserState<K, V> {
             new CompletableFuture<>());
       }
     }
-    isClosed = true;
   }
 
   private ByteString encodeValues(Iterable<V> values) {
@@ -258,7 +262,7 @@ public class MultimapUserState<K, V> {
     }
   }
 
-  private Iterable<V> getPersistedValues(@NonNull K key) {
+  private Iterable<V> getPersistedValues(K key) {
     if (negativeCache.contains(key)) {
       return Collections.emptyList();
     }
@@ -276,6 +280,7 @@ public class MultimapUserState<K, V> {
   }
 
   private Iterable<K> getPersistedKeys() {
+    checkState(!isCleared);
     if (persistedKeys == null) {
       Iterable<K> keys =
           StateFetchingIterators.readAllAndDecodeStartingFrom(
