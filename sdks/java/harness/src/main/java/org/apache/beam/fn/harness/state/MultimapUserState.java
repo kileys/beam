@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.apache.beam.model.fnexecution.v1.BeamFnApi.StateAppendRequest;
@@ -225,12 +226,11 @@ public class MultimapUserState<K, V> {
 
     // Persist pending key-values
     if (!pendingAdds.isEmpty()) {
-      for (K key : pendingAdds.keySet()) {
+      for (Map.Entry<K, List<V>> entry : pendingAdds.entrySet()) {
         beamFnStateClient.handle(
-            createUserStateRequest(key)
+            createUserStateRequest(entry.getKey())
                 .toBuilder()
-                .setAppend(
-                    StateAppendRequest.newBuilder().setData(encodeValues(pendingAdds.get(key)))),
+                .setAppend(StateAppendRequest.newBuilder().setData(encodeValues(entry.getValue()))),
             new CompletableFuture<>());
       }
     }
