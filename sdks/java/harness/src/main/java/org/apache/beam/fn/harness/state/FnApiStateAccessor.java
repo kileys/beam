@@ -360,7 +360,7 @@ public class FnApiStateAccessor<K> implements SideInputReader, StateBinder {
 
                   @Override
                   public ReadableState<Boolean> addIfAbsent(T t) {
-                    boolean isEmpty = Iterables.isEmpty(impl.get(t));
+                    Boolean isEmpty = Iterables.isEmpty(impl.get(t));
                     if (isEmpty) {
                       impl.put(t, null);
                     }
@@ -511,7 +511,7 @@ public class FnApiStateAccessor<K> implements SideInputReader, StateBinder {
                   public ReadableState<Iterable<Map.Entry<KeyT, ValueT>>> entries() {
                     return new ReadableState<Iterable<Map.Entry<KeyT, ValueT>>>() {
                       @Override
-                      public @Nullable Iterable<Map.Entry<KeyT, ValueT>> read() {
+                      public Iterable<Map.Entry<KeyT, ValueT>> read() {
                         Iterable<KeyT> keys = keys().read();
                         return Iterables.transform(
                             keys, key -> Maps.immutableEntry(key, get(key).read()));
