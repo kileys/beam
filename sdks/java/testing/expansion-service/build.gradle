@@ -27,9 +27,9 @@ ext.summary = """Testing Expansion Service used for executing cross-language tra
 
 
 dependencies {
-  testCompile project(path: ":sdks:java:io:parquet")
-  testCompile project(":sdks:java:expansion-service")
-  testRuntime library.java.hadoop_client
+  testImplementation project(path: ":sdks:java:io:parquet")
+  testImplementation project(":sdks:java:expansion-service")
+  testRuntimeOnly library.java.hadoop_client
 }
 
 task runTestExpansionService (type: JavaExec) {

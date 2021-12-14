@@ -65,30 +65,30 @@ configurations {
 }
 
 dependencies {
-  compile library.java.vendored_guava_26_0_jre
-  compile project(path: ":sdks:java:core", configuration: "shadow")
-  compile project(":sdks:java:io:google-cloud-platform")
-  compile project(":sdks:java:extensions:google-cloud-platform-core")
-  compile project(":sdks:java:extensions:sql")
-  compile project(":sdks:java:extensions:sql:zetasql")
-  compile project(":sdks:java:io:kafka")
-  compile project(":sdks:java:testing:test-utils")
-  compile library.java.google_api_client
-  compile library.java.junit
-  compile "org.hamcrest:hamcrest:2.1"
-  compile library.java.google_api_services_bigquery
-  compile library.java.jackson_core
-  compile library.java.jackson_annotations
-  compile library.java.jackson_databind
-  compile library.java.jackson_datatype_joda
-  compile library.java.avro
-  compile library.java.joda_time
-  compile library.java.slf4j_api
-  compile library.java.kafka_clients
+  api library.java.vendored_guava_26_0_jre
+  api project(path: ":sdks:java:core", configuration: "shadow")
+  api project(":sdks:java:io:google-cloud-platform")
+  api project(":sdks:java:extensions:google-cloud-platform-core")
+  api project(":sdks:java:extensions:sql")
+  api project(":sdks:java:extensions:sql:zetasql")
+  api project(":sdks:java:io:kafka")
+  api project(":sdks:java:testing:test-utils")
+  api library.java.google_api_client
+  api library.java.junit
+  api "org.hamcrest:hamcrest:2.1"
+  api library.java.google_api_services_bigquery
+  api library.java.jackson_core
+  api library.java.jackson_annotations
+  api library.java.jackson_databind
+  api library.java.jackson_datatype_joda
+  api library.java.avro
+  api library.java.joda_time
+  api library.java.slf4j_api
+  api library.java.kafka_clients
   compileOnly library.java.error_prone_annotations
   testRuntimeClasspath library.java.slf4j_jdk14
-  testCompile project(path: ":sdks:java:io:google-cloud-platform", configuration: "testRuntime")
-  testCompile project(path: ":sdks:java:testing:test-utils", configuration: "testRuntime")
+  testImplementation project(path: ":sdks:java:io:google-cloud-platform", configuration: "testRuntimeOnly")
+  testImplementation project(path: ":sdks:java:testing:test-utils", configuration: "testRuntimeOnly")
   gradleRun project(project.path)
   gradleRun project(path: nexmarkRunnerDependency, configuration: runnerConfiguration)
 

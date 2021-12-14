@@ -33,7 +33,7 @@ dependencies {
    * but should not be used within this library to execute any UDFs.
    * TODO: Add an APISurfaceTest to force this to be the case, if possible.
   */
-  compile project(path: ":sdks:java:core", configuration: "shadow")
-  compile library.java.joda_time
-  testCompile library.java.junit
+  api project(path: ":sdks:java:core", configuration: "shadow")
+  api library.java.joda_time
+  testImplementation library.java.junit
 }

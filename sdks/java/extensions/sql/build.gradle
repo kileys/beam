@@ -59,42 +59,42 @@ dependencies {
   fmppTask "com.googlecode.fmpp-maven-plugin:fmpp-maven-plugin:1.0"
   fmppTask "org.freemarker:freemarker:2.3.31"
   fmppTemplates library.java.vendored_calcite_1_28_0
-  compile project(path: ":sdks:java:core", configuration: "shadow")
-  compile project(":sdks:java:extensions:join-library")
+  api project(path: ":sdks:java:core", configuration: "shadow")
+  api project(":sdks:java:extensions:join-library")
   permitUnusedDeclared project(":sdks:java:extensions:join-library") // BEAM-11761
-  compile project(":sdks:java:extensions:sql:udf")
-  compile project(path: ":runners:direct-java", configuration: "shadow")
-  compile library.java.commons_codec
-  compile library.java.commons_csv
-  compile library.java.jackson_databind
-  compile library.java.joda_time
-  compile library.java.vendored_calcite_1_28_0
-  compile "com.alibaba:fastjson:1.2.69"
-  compile "org.codehaus.janino:janino:3.0.11"
-  compile "org.codehaus.janino:commons-compiler:3.0.11"
-  compile library.java.jackson_core
-  compile library.java.mongo_java_driver
-  compile library.java.slf4j_api
-  compile library.java.joda_time
-  compile library.java.vendored_guava_26_0_jre
+  api project(":sdks:java:extensions:sql:udf")
+  api project(path: ":runners:direct-java", configuration: "shadow")
+  api library.java.commons_codec
+  api library.java.commons_csv
+  api library.java.jackson_databind
+  api library.java.joda_time
+  api library.java.vendored_calcite_1_28_0
+  api "com.alibaba:fastjson:1.2.69"
+  api "org.codehaus.janino:janino:3.0.11"
+  api "org.codehaus.janino:commons-compiler:3.0.11"
+  api library.java.jackson_core
+  api library.java.mongo_java_driver
+  api library.java.slf4j_api
+  api library.java.joda_time
+  api library.java.vendored_guava_26_0_jre
   provided project(":sdks:java:io:kafka")
   provided project(":sdks:java:io:google-cloud-platform")
-  compile project(":sdks:java:io:mongodb")
-  compile library.java.avro
+  api project(":sdks:java:io:mongodb")
+  api library.java.avro
   provided project(":sdks:java:io:parquet")
   provided library.java.jackson_dataformat_xml
   provided library.java.hadoop_client
   provided library.java.kafka_clients
-  testCompile library.java.vendored_calcite_1_28_0
-  testCompile library.java.vendored_guava_26_0_jre
-  testCompile library.java.junit
-  testCompile library.java.quickcheck_core
-  testCompile library.java.testcontainers_kafka
-  testCompile library.java.google_cloud_bigtable_emulator
-  testCompile project(path: ":sdks:java:io:mongodb", configuration: "testRuntime")
-  testCompile project(path: ":sdks:java:io:thrift", configuration: "testRuntime")
-  testCompile project(path: ":sdks:java:extensions:protobuf", configuration: "testRuntime")
-  testCompileOnly project(":sdks:java:extensions:sql:udf-test-provider")
+  testImplementation library.java.vendored_calcite_1_28_0
+  testImplementation library.java.vendored_guava_26_0_jre
+  testImplementation library.java.junit
+  testImplementation library.java.quickcheck_core
+  testImplementation library.java.testcontainers_kafka
+  testImplementation library.java.google_cloud_bigtable_emulator
+  testImplementation project(path: ":sdks:java:io:mongodb", configuration: "testRuntimeOnly")
+  testImplementation project(path: ":sdks:java:io:thrift", configuration: "testRuntimeOnly")
+  testImplementation project(path: ":sdks:java:extensions:protobuf", configuration: "testRuntimeOnly")
+  testImplementationOnly project(":sdks:java:extensions:sql:udf-test-provider")
   testRuntimeClasspath library.java.slf4j_jdk14
   hadoopVersions.each {kv ->
     "hadoopVersion$kv.key" "org.apache.hadoop:hadoop-client:$kv.value"

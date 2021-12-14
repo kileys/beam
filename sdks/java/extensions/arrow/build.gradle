@@ -22,12 +22,12 @@ applyJavaNature( automaticModuleName: 'org.apache.beam.sdk.extensions.arrow')
 description = "Apache Beam :: SDKs :: Java :: Extensions :: Arrow"
 
 dependencies {
-    compile library.java.vendored_guava_26_0_jre
-    compile project(path: ":sdks:java:core", configuration: "shadow")
-    compile library.java.arrow_vector
-    compile library.java.arrow_memory_core
-    compile library.java.joda_time
-    testCompile library.java.arrow_memory_netty
-    testCompile library.java.junit
+    api library.java.vendored_guava_26_0_jre
+    api project(path: ":sdks:java:core", configuration: "shadow")
+    api library.java.arrow_vector
+    api library.java.arrow_memory_core
+    api library.java.joda_time
+    testImplementation library.java.arrow_memory_netty
+    testImplementation library.java.junit
     testRuntimeOnly library.java.slf4j_simple
 }

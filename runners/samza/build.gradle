@@ -43,42 +43,42 @@ configurations {
 def samza_version = "1.5.0"
 
 dependencies {
-  compile library.java.vendored_guava_26_0_jre
-  compile project(path: ":sdks:java:core", configuration: "shadow")
-  compile project(":runners:core-java")
-  compile project(":runners:core-construction-java")
-  compile project(":runners:java-fn-execution")
-  compile project(":runners:java-job-service")
-  compile library.java.jackson_annotations
-  compile library.java.slf4j_api
-  compile library.java.joda_time
-  compile library.java.args4j
-  compile library.java.commons_io
+  api library.java.vendored_guava_26_0_jre
+  api project(path: ":sdks:java:core", configuration: "shadow")
+  api project(":runners:core-java")
+  api project(":runners:core-construction-java")
+  api project(":runners:java-fn-execution")
+  api project(":runners:java-job-service")
+  api library.java.jackson_annotations
+  api library.java.slf4j_api
+  api library.java.joda_time
+  api library.java.args4j
+  api library.java.commons_io
   runtimeOnly "org.rocksdb:rocksdbjni:6.15.2"
   runtimeOnly "org.scala-lang:scala-library:2.11.8"
-  compile "org.apache.samza:samza-api:$samza_version"
-  compile "org.apache.samza:samza-core_2.11:$samza_version"
+  api "org.apache.samza:samza-api:$samza_version"
+  api "org.apache.samza:samza-core_2.11:$samza_version"
   runtimeOnly "org.apache.samza:samza-kafka_2.11:$samza_version"
   runtimeOnly "org.apache.samza:samza-kv_2.11:$samza_version"
-  compile "org.apache.samza:samza-kv-rocksdb_2.11:$samza_version"
-  compile "org.apache.samza:samza-kv-inmemory_2.11:$samza_version"
-  compile "org.apache.samza:samza-yarn_2.11:$samza_version"
+  api "org.apache.samza:samza-kv-rocksdb_2.11:$samza_version"
+  api "org.apache.samza:samza-kv-inmemory_2.11:$samza_version"
+  api "org.apache.samza:samza-yarn_2.11:$samza_version"
   compileOnly library.java.error_prone_annotations
   runtimeOnly "org.apache.kafka:kafka-clients:2.0.1"
-  compile library.java.vendored_grpc_1_36_0
-  compile project(path: ":model:fn-execution", configuration: "shadow")
-  compile project(path: ":model:job-management", configuration: "shadow")
-  compile project(path: ":model:pipeline", configuration: "shadow")
-  compile project(":sdks:java:fn-execution")
-  testCompile project(path: ":sdks:java:core", configuration: "shadowTest")
-  testCompile project(path: ":runners:core-java", configuration: "testRuntime")
-  testCompile library.java.hamcrest_core
-  testCompile library.java.junit
-  testCompile library.java.mockito_core
-  testCompile library.java.jackson_dataformat_yaml
-  testCompile library.java.google_code_gson
+  api library.java.vendored_grpc_1_36_0
+  api project(path: ":model:fn-execution", configuration: "shadow")
+  api project(path: ":model:job-management", configuration: "shadow")
+  api project(path: ":model:pipeline", configuration: "shadow")
+  api project(":sdks:java:fn-execution")
+  testImplementation project(path: ":sdks:java:core", configuration: "shadowTest")
+  testImplementation project(path: ":runners:core-java", configuration: "testRuntimeOnly")
+  testImplementation library.java.hamcrest_core
+  testImplementation library.java.junit
+  testImplementation library.java.mockito_core
+  testImplementation library.java.jackson_dataformat_yaml
+  testImplementation library.java.google_code_gson
   validatesRunner project(path: ":sdks:java:core", configuration: "shadowTest")
-  validatesRunner project(path: ":runners:core-java", configuration: "testRuntime")
+  validatesRunner project(path: ":runners:core-java", configuration: "testRuntimeOnly")
   validatesRunner project(project.path)
 }
 

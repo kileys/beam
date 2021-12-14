@@ -35,19 +35,19 @@ test {
 }
 
 dependencies {
-  compile project(path: ":model:pipeline", configuration: "shadow")
-  compile project(path: ":model:job-management", configuration: "shadow")
-  compile project(path: ":sdks:java:core", configuration: "shadow")
-  compile project(path: ":runners:core-construction-java")
-  compile project(path: ":runners:java-fn-execution")
-  compile library.java.jackson_annotations
-  compile library.java.jackson_databind
-  compile library.java.jackson_dataformat_yaml
-  compile library.java.vendored_grpc_1_36_0
-  compile library.java.vendored_guava_26_0_jre
-  compile library.java.slf4j_api
+  api project(path: ":model:pipeline", configuration: "shadow")
+  api project(path: ":model:job-management", configuration: "shadow")
+  api project(path: ":sdks:java:core", configuration: "shadow")
+  api project(path: ":runners:core-construction-java")
+  api project(path: ":runners:java-fn-execution")
+  api library.java.jackson_annotations
+  api library.java.jackson_databind
+  api library.java.jackson_dataformat_yaml
+  api library.java.vendored_grpc_1_36_0
+  api library.java.vendored_guava_26_0_jre
+  api library.java.slf4j_api
   runtimeOnly library.java.slf4j_jdk14
-  testCompile library.java.junit
+  testImplementation library.java.junit
 }
 
 task runExpansionService (type: JavaExec) {

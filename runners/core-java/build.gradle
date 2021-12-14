@@ -39,18 +39,18 @@ test {
 }
 
 dependencies {
-  compile project(path: ":model:pipeline", configuration: "shadow")
-  compile project(path: ":sdks:java:core", configuration: "shadow")
-  compile project(path: ":model:job-management", configuration: "shadow")
-  compile project(":runners:core-construction-java")
-  compile project(":sdks:java:fn-execution")
-  compile library.java.vendored_guava_26_0_jre
-  compile library.java.joda_time
-  compile library.java.vendored_grpc_1_36_0
-  compile library.java.slf4j_api
-  testCompile project(path: ":sdks:java:core", configuration: "shadowTest")
-  testCompile library.java.junit
-  testCompile library.java.mockito_core
-  testCompile library.java.slf4j_api
+  api project(path: ":model:pipeline", configuration: "shadow")
+  api project(path: ":sdks:java:core", configuration: "shadow")
+  api project(path: ":model:job-management", configuration: "shadow")
+  api project(":runners:core-construction-java")
+  api project(":sdks:java:fn-execution")
+  api library.java.vendored_guava_26_0_jre
+  api library.java.joda_time
+  api library.java.vendored_grpc_1_36_0
+  api library.java.slf4j_api
+  testImplementation project(path: ":sdks:java:core", configuration: "shadowTest")
+  testImplementation library.java.junit
+  testImplementation library.java.mockito_core
+  testImplementation library.java.slf4j_api
   testRuntimeOnly library.java.slf4j_simple
 }

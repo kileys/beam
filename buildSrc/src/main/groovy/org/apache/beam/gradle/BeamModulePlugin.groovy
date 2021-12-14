@@ -684,7 +684,7 @@ class BeamModulePlugin implements Plugin<Project> {
         arrow_memory_netty                          : "org.apache.arrow:arrow-memory-netty:$arrow_version",
       ],
       groovy: [
-        groovy_all: "org.codehaus.groovy:groovy-all:2.4.13",
+        groovy_all: "org.codehaus.groovy:groovy-all:3.0.7",
       ],
       // For generating pom.xml from archetypes.
       maven: [
@@ -745,7 +745,7 @@ class BeamModulePlugin implements Plugin<Project> {
     // See JavaNatureConfiguration for the set of accepted properties.
     //
     // The following plugins are enabled:
-    //  * java
+    //  * java-library
     //  * maven
     //  * net.ltgt.apt (plugin to configure annotation processing tool)
     //  * propdeps (provide optional and provided dependency configurations)
@@ -789,6 +789,8 @@ class BeamModulePlugin implements Plugin<Project> {
     // added to the main and test source set runtimes.
 
     project.ext.applyJavaNature = {
+      Test b = ['a' : true, 'b' : false] as Test;
+      Test a = ['a': true] as Test;
       // Use the implicit it parameter of the closure to handle zero argument or one argument map calls.
       JavaNatureConfiguration configuration = it ? it as JavaNatureConfiguration : new JavaNatureConfiguration()
 
@@ -796,7 +798,7 @@ class BeamModulePlugin implements Plugin<Project> {
         project.archivesBaseName = configuration.archivesBaseName
       }
 
-      project.apply plugin: "java"
+      project.apply plugin: "java-library"
 
       // Configure the Java compiler source language and target compatibility levels. Also ensure that
       // we configure the Java compiler to use UTF-8.
@@ -1836,7 +1838,11 @@ class BeamModulePlugin implements Plugin<Project> {
     /** ***********************************************************************************************/
 
     project.ext.applyGroovyNature = {
+
       project.apply plugin: "groovy"
+      project.dependencies {
+        implementation 'org.codehaus.groovy:groovy-all:3.0.9'
+      }
 
       project.apply plugin: "com.diffplug.spotless"
       def disableSpotlessCheck = project.hasProperty('disableSpotlessCheck') &&
@@ -2554,5 +2560,10 @@ class BeamModulePlugin implements Plugin<Project> {
         attributes 'Automatic-Module-Name': configuration.automaticModuleName
       }
     }
+  }
+
+  class Test {
+    Boolean a;
+    Boolean b;
   }
 }

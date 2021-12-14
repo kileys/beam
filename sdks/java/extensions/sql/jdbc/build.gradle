@@ -31,19 +31,19 @@ configurations {
 }
 
 dependencies {
-  compile project(":sdks:java:extensions:sql")
-  compile "jline:jline:2.14.6"
+  api project(":sdks:java:extensions:sql")
+  api "jline:jline:2.14.6"
   permitUnusedDeclared "jline:jline:2.14.6" // BEAM-11761
-  compile "sqlline:sqlline:1.4.0"
-  compile library.java.vendored_guava_26_0_jre
-  testCompile project(path: ":sdks:java:io:google-cloud-platform", configuration: "testRuntime")
-  testCompile library.java.junit
+  api "sqlline:sqlline:1.4.0"
+  api library.java.vendored_guava_26_0_jre
+  testImplementation project(path: ":sdks:java:io:google-cloud-platform", configuration: "testRuntimeOnly")
+  testImplementation library.java.junit
   // Depending on outputs so integrationTest can run with only test dependencies.
   // This enables us to test the JDBC jar being loaded on a custom classloader.
   integrationTest sourceSets.test.output
   integrationTest sourceSets.main.output
   integrationTest library.java.junit
-  compile project(path: ":sdks:java:core", configuration: "shadow")
+  api project(path: ":sdks:java:core", configuration: "shadow")
 }
 
 processResources {

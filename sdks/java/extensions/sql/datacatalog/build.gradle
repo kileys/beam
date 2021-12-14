@@ -24,25 +24,25 @@ applyJavaNature(
   automaticModuleName: 'org.apache.beam.sdk.extensions.sql.datacatalog')
 
 dependencies {
-  compile enforcedPlatform(library.java.google_cloud_platform_libraries_bom)
+  api enforcedPlatform(library.java.google_cloud_platform_libraries_bom)
   compile(library.java.google_cloud_datacatalog_v1beta1) {
     exclude group: 'io.grpc', module: 'grpc-core' // Use Beam's version
   }
-  compile library.java.gax
-  compile library.java.google_auth_library_credentials
-  compile library.java.proto_google_cloud_datacatalog_v1beta1
-  compile library.java.protobuf_java
-  compile library.java.slf4j_api
-  compile library.java.vendored_guava_26_0_jre
-  compile project(path: ":sdks:java:core", configuration: "shadow")
-  compile "org.threeten:threetenbp:1.4.5"
+  api library.java.gax
+  api library.java.google_auth_library_credentials
+  api library.java.proto_google_cloud_datacatalog_v1beta1
+  api library.java.protobuf_java
+  api library.java.slf4j_api
+  api library.java.vendored_guava_26_0_jre
+  api project(path: ":sdks:java:core", configuration: "shadow")
+  api "org.threeten:threetenbp:1.4.5"
   provided project(":sdks:java:extensions:sql")
 
   // Dependencies for the example
   provided project(":sdks:java:io:google-cloud-platform")
   provided library.java.slf4j_api
 
-  testCompile project(":sdks:java:extensions:sql:zetasql")
+  testImplementation project(":sdks:java:extensions:sql:zetasql")
   testRuntimeOnly library.java.slf4j_simple
 }
 

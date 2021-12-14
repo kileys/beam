@@ -23,12 +23,12 @@ description = "Apache Beam :: SDKs :: Java :: IO :: Redis"
 ext.summary ="IO to read and write on a Redis keystore."
 
 dependencies {
-  compile library.java.vendored_guava_26_0_jre
-  compile project(path: ":sdks:java:core", configuration: "shadow")
-  compile "redis.clients:jedis:3.5.2"
-  testCompile project(path: ":sdks:java:io:common", configuration: "testRuntime")
-  testCompile library.java.junit
-  testCompile "com.github.kstyrc:embedded-redis:0.6"
+  api library.java.vendored_guava_26_0_jre
+  api project(path: ":sdks:java:core", configuration: "shadow")
+  api "redis.clients:jedis:3.5.2"
+  testImplementation project(path: ":sdks:java:io:common", configuration: "testRuntimeOnly")
+  testImplementation library.java.junit
+  testImplementation "com.github.kstyrc:embedded-redis:0.6"
   testRuntimeOnly library.java.slf4j_jdk14
   testRuntimeOnly project(path: ":runners:direct-java", configuration: "shadow")
 }

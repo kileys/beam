@@ -32,7 +32,7 @@ configurations { dataflowRunnerPreCommit }
 
 dependencies {
   testRuntimeOnly project(":examples:java")
-  testRuntimeOnly project(path: ":examples:java", configuration: "testRuntime")
+  testRuntimeOnly project(path: ":examples:java", configuration: "testRuntimeOnly")
   testRuntimeOnly project(":runners:google-cloud-dataflow-java")
 }
 
