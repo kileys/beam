@@ -217,4 +217,12 @@ public interface DataflowPipelineOptions
   boolean isHotKeyLoggingEnabled();
 
   void setHotKeyLoggingEnabled(boolean value);
+
+  /**
+   * TODO
+   */
+  @Description("TODO")
+  List<String> getDataflowAddOpenModules();
+
+  void setDataflowAddOpenModules(List<String> options);
 }

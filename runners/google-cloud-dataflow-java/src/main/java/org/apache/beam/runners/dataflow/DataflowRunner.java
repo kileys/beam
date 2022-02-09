@@ -27,6 +27,7 @@ import static org.apache.beam.vendor.guava.v26_0_jre.com.google.common.base.Prec
 import static org.apache.beam.vendor.guava.v26_0_jre.com.google.common.base.Preconditions.checkState;
 import static org.apache.beam.vendor.guava.v26_0_jre.com.google.common.base.Strings.isNullOrEmpty;
 
+import avro.shaded.com.google.common.collect.Lists;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -1055,6 +1056,11 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
     DataflowPipelineOptions dataflowOptions = options.as(DataflowPipelineOptions.class);
     String workerHarnessContainerImageURL = DataflowRunner.getContainerImageForJob(dataflowOptions);
 
+    if (Environments.getJavaVersion() == Environments.JavaVersion.java17) {
+      dataflowOptions.setDataflowAddOpenModules(
+          Arrays.asList("java.base/java.lang=jamm", "java.base/java.lang.ref=jamm",
+              "java.base/java.util=jamm"));
+    }
     // This incorrectly puns the worker harness container image (which implements v1beta3 API)
     // with the SDK harness image (which implements Fn API).
     //

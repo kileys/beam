@@ -100,6 +100,8 @@ func main() {
 	// (1) Obtain the pipeline options
 
 	options, err := provision.ProtoToJSON(info.GetPipelineOptions())
+	log.Printf("kiley test")
+	log.Printf(options)
 	if err != nil {
 		log.Fatalf("Failed to convert pipeline options: %v", err)
 	}
@@ -192,6 +194,10 @@ func main() {
 		log.Printf("Disabling Jamm agent. Measuring object size will be inaccurate.")
 	} else {
 		args = append(args, jammAgentArgs)
+    if (string.Contains(options, "")) {
+      args = append(args, "--add-modules=ALL-MODULE-PATH")
+      args = append(args, "--module-path=" + filepath.Join(jarsDir, "jamm.jar")) // TODO do we need?
+    }
 	}
 
 	args = append(args, "org.apache.beam.fn.harness.FnHarness")
