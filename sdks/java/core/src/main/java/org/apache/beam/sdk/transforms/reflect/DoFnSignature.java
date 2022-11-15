@@ -20,6 +20,7 @@ package org.apache.beam.sdk.transforms.reflect;
 import com.google.auto.value.AutoValue;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -152,12 +153,16 @@ public abstract class DoFnSignature {
     return timerDeclarations().size() > 0 || timerFamilyDeclarations().size() > 0;
   }
 
+  public abstract @Nullable OutputReceiverMethod outputReceiverMethod();
+
   static Builder builder() {
     return new AutoValue_DoFnSignature.Builder();
   }
 
   @AutoValue.Builder
   abstract static class Builder {
+    abstract Builder setOutputReceiverMethod(OutputReceiverMethod outputReceiverMethod);
+
     abstract Builder setFnClass(Class<? extends DoFn<?, ?>> fnClass);
 
     abstract Builder setIsBoundedPerElement(PCollection.IsBounded isBounded);
@@ -324,6 +329,7 @@ public abstract class DoFnSignature {
 
     /** An interface for destructuring a {@link Parameter}. */
     public interface Cases<ResultT> {
+
       ResultT dispatch(StartBundleContextParameter p);
 
       ResultT dispatch(FinishBundleContextParameter p);
@@ -650,6 +656,7 @@ public abstract class DoFnSignature {
     public static TimerFamilyParameter timerFamilyParameter(TimerFamilyDeclaration decl) {
       return new AutoValue_DoFnSignature_Parameter_TimerFamilyParameter(decl);
     }
+
 
     /** Descriptor for a {@link Parameter} of a subtype of {@link PipelineOptions}. */
     @AutoValue
@@ -1073,6 +1080,17 @@ public abstract class DoFnSignature {
           requiresStableInput,
           windowT,
           Collections.unmodifiableList(extraParameters));
+    }
+  }
+
+  @AutoValue
+  public abstract static class OutputReceiverMethod implements MethodWithExtraParameters {
+
+    @Override
+    public List<Parameter> extraParameters() {
+      List<Parameter> l = new ArrayList<>();
+      l.add(Parameter.processContext());
+      return l;
     }
   }
 

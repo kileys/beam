@@ -110,6 +110,8 @@ public interface DoFnInvoker<InputT, OutputT> {
    */
   double invokeGetSize(ArgumentProvider<InputT, OutputT> arguments);
 
+  OutputReceiver<OutputT> invokeOutputReceiver(ArgumentProvider<InputT, OutputT> arguments);
+
   /** Invoke the {@link DoFn.NewTracker} method on the bound {@link DoFn}. */
   @SuppressWarnings("TypeParameterUnusedInFormals")
   <RestrictionT, PositionT> RestrictionTracker<RestrictionT, PositionT> invokeNewTracker(

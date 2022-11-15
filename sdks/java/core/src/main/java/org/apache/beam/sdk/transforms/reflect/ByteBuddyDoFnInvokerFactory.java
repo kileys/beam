@@ -71,6 +71,8 @@ import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.DoFn.GetSize;
 import org.apache.beam.sdk.transforms.DoFn.ProcessElement;
 import org.apache.beam.sdk.transforms.DoFn.TruncateRestriction;
+import org.apache.beam.sdk.transforms.DoFn.WindowedContext;
+import org.apache.beam.sdk.transforms.DoFnOutputReceivers;
 import org.apache.beam.sdk.transforms.reflect.DoFnSignature.OnTimerMethod;
 import org.apache.beam.sdk.transforms.reflect.DoFnSignature.Parameter.BundleFinalizerParameter;
 import org.apache.beam.sdk.transforms.reflect.DoFnSignature.Parameter.Cases;
@@ -103,6 +105,7 @@ import org.apache.beam.sdk.transforms.splittabledofn.RestrictionTracker.Truncate
 import org.apache.beam.sdk.transforms.splittabledofn.WatermarkEstimator;
 import org.apache.beam.sdk.transforms.windowing.GlobalWindow;
 import org.apache.beam.sdk.util.UserCodeException;
+import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.TypeDescriptor;
 import org.apache.beam.sdk.values.TypeDescriptors;
 import org.apache.beam.vendor.guava.v26_0_jre.com.google.common.collect.Maps;
@@ -472,7 +475,8 @@ class ByteBuddyDoFnInvokerFactory implements DoFnInvokerFactory {
             //   }
             .method(ElementMatchers.named("invokeProcessElement"))
             .intercept(new ProcessElementDelegation(clazzDescription, signature.processElement()))
-
+            .method(ElementMatchers.named("invokeDoFnOutputReceiver"))
+            .intercept(new DoFnOutputReceiverDelegation(clazzDescription, signature.outputReceiverMethod()))
             //   public invokeStartBundle(Context c) { delegate.<@StartBundle>(c); }
             //   ... etc ...
             .method(ElementMatchers.named("invokeStartBundle"))
@@ -1148,6 +1152,34 @@ class ByteBuddyDoFnInvokerFactory implements DoFnInvokerFactory {
         return MethodReturn.of(targetMethod.getReturnType().asErasure());
       }
     }
+  }
+
+  private static final class DoFnOutputReceiverDelegation
+      extends DoFnMethodWithExtraParametersDelegation {
+
+    private static final MethodDescription WINDOWED_RECEIVER_METHOD;
+
+    static {
+      try {
+        // todo row/multi
+        WINDOWED_RECEIVER_METHOD =
+            new MethodDescription.ForLoadedMethod(DoFnOutputReceivers.class.getMethod("windowedReceiver", DoFn.WindowedContext.class, TupleTag.class));
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException("Failed to locate windowedReceiver()");
+      }
+    }
+
+    /** Implementation of {@link MethodDelegation} for the {@link GetSize} method. */
+    private DoFnOutputReceiverDelegation(TypeDescription doFnType, DoFnSignature.OutputReceiverMethod signature) {
+      super(doFnType, signature);
+    }
+
+    @Override
+    protected StackManipulation afterDelegation(MethodDescription instrumentedMethod) {
+      return new StackManipulation.Compound(
+          MethodInvocation.invoke(WINDOWED_RECEIVER_METHOD), MethodReturn.DOUBLE);
+    }
+
   }
 
   /**
