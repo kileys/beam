@@ -2478,7 +2478,7 @@ public class FnApiDoFnRunner<InputT, RestrictionT, PositionT, WatermarkEstimator
 
     @Override
     public OutputReceiver<OutputT> outputReceiver(DoFn<InputT, OutputT> doFn) {
-      return DoFnOutputReceivers.windowedReceiver(this, null);
+      return doFnInvoker.invokeOutputReceiver(this);
     }
 
     @Override
