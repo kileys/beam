@@ -20,6 +20,7 @@ package org.apache.beam.sdk.transforms.reflect;
 import com.google.auto.value.AutoValue;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.apache.beam.sdk.state.Timer;
 import org.apache.beam.sdk.state.TimerSpec;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.DoFn.MultiOutputReceiver;
+import org.apache.beam.sdk.transforms.DoFn.OutputReceiver;
 import org.apache.beam.sdk.transforms.DoFn.ProcessContinuation;
 import org.apache.beam.sdk.transforms.DoFn.StateId;
 import org.apache.beam.sdk.transforms.DoFn.TimerId;
@@ -136,6 +138,8 @@ public abstract class DoFnSignature {
   /** Details about this {@link DoFn}'s {@link DoFn.OnTimerFamily} methods. */
   public abstract @Nullable Map<String, OnTimerFamilyMethod> onTimerFamilyMethods();
 
+  public abstract @Nullable OutputReceiverMethod outputReceiverMethod();
+
   /** @deprecated use {@link #usesState()}, it's cleaner */
   @Deprecated
   public boolean isStateful() {
@@ -158,6 +162,7 @@ public abstract class DoFnSignature {
 
   @AutoValue.Builder
   abstract static class Builder {
+    abstract Builder setOutputReceiver(OutputReceiverMethod outputReceiver);
     abstract Builder setFnClass(Class<? extends DoFn<?, ?>> fnClass);
 
     abstract Builder setIsBoundedPerElement(PCollection.IsBounded isBounded);
@@ -946,7 +951,15 @@ public abstract class DoFnSignature {
       public abstract TimerFamilyDeclaration referent();
     }
   }
-
+  @AutoValue
+  public abstract static class OutputReceiverMethod implements MethodWithExtraParameters {
+    @Override
+    public List<Parameter> extraParameters() {
+      List<Parameter> p = new ArrayList<>();
+      p.add(Parameter.PROCESS_CONTEXT_PARAMETER);
+      return p;
+    }
+  }
   /** Describes a {@link DoFn.ProcessElement} method. */
   @AutoValue
   public abstract static class ProcessElementMethod implements MethodWithExtraParameters {

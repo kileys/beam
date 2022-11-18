@@ -69,6 +69,7 @@ import org.apache.beam.sdk.state.Timer;
 import org.apache.beam.sdk.state.TimerMap;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.DoFn.GetSize;
+import org.apache.beam.sdk.transforms.DoFn.OutputReceiver;
 import org.apache.beam.sdk.transforms.DoFn.ProcessElement;
 import org.apache.beam.sdk.transforms.DoFn.TruncateRestriction;
 import org.apache.beam.sdk.transforms.reflect.DoFnSignature.OnTimerMethod;
@@ -513,7 +514,9 @@ class ByteBuddyDoFnInvokerFactory implements DoFnInvokerFactory {
             .method(ElementMatchers.named("invokeNewWatermarkEstimator"))
             .intercept(
                 newWatermarkEstimatorDelegation(
-                    clazzDescription, signature.newWatermarkEstimator()));
+                    clazzDescription, signature.newWatermarkEstimator()))
+            .method(ElementMatchers.named("invokeOutputReceiver"))
+            .intercept(new OutputReceiverDelegation(clazzDescription, signature.outputReceiverMethod()));
 
     DynamicType.Unloaded<?> unloaded = builder.make();
     @SuppressWarnings("unchecked")
@@ -1114,6 +1117,30 @@ class ByteBuddyDoFnInvokerFactory implements DoFnInvokerFactory {
                 TypeCasting.to(new TypeDescription.ForLoadedType(p.keyT().getRawType())));
           }
         });
+  }
+
+  private static final class OutputReceiverDelegation extends DoFnMethodWithExtraParametersDelegation {
+    static {
+      // todo how to return output receiver
+      DynamicType.Unloaded bbOutputReceiver = new ByteBuddy()
+          .subclass(OutputReceiver.class)
+          .method(ElementMatchers.named("output"))
+          .intercept(MethodDelegation.to(DoFn.WindowedContext.class))
+          .make();
+      Class<?> or = bbOutputReceiver.load(OutputReceiverDelegation.class
+              .getClassLoader())
+          .getLoaded();
+    }
+
+    private OutputReceiverDelegation(
+        TypeDescription doFnType, DoFnSignature.OutputReceiverMethod signature) {
+      super(doFnType, signature);
+    }
+
+    @Override
+    protected StackManipulation afterDelegation(MethodDescription instrumentedMethod) {
+      return new StackManipulation.Compound();
+    }
   }
 
   /**
