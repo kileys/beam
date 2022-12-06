@@ -24,9 +24,9 @@ go 1.18
 
 require (
 	cloud.google.com/go/bigquery v1.44.0
-	cloud.google.com/go/datastore v1.9.0
+	cloud.google.com/go/datastore v1.10.0
 	cloud.google.com/go/profiler v0.3.0
-	cloud.google.com/go/pubsub v1.27.0
+	cloud.google.com/go/pubsub v1.28.0
 	cloud.google.com/go/storage v1.28.0
 	github.com/aws/aws-sdk-go-v2 v1.17.1
 	github.com/aws/aws-sdk-go-v2/config v1.18.3
@@ -54,14 +54,14 @@ require (
 	golang.org/x/sys v0.2.0
 	golang.org/x/text v0.4.0
 	google.golang.org/api v0.103.0
-	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6
+	google.golang.org/genproto v0.0.0-20221202195650-67e5cbc046fd
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/retry.v1 v1.0.3
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require cloud.google.com/go/spanner v1.40.0
+require cloud.google.com/go/spanner v1.41.0
 
 require (
 	cloud.google.com/go/bigtable v1.18.0
@@ -70,7 +70,7 @@ require (
 
 require (
 	cloud.google.com/go v0.105.0 // indirect
-	cloud.google.com/go/compute v1.12.1 // indirect
+	cloud.google.com/go/compute v1.13.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.1 // indirect
 	cloud.google.com/go/iam v0.7.0 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
