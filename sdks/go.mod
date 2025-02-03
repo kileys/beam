@@ -28,12 +28,12 @@ require (
 	cloud.google.com/go/profiler v0.3.0
 	cloud.google.com/go/pubsub v1.27.0
 	cloud.google.com/go/storage v1.28.0
-	github.com/aws/aws-sdk-go-v2 v1.17.1
+	github.com/aws/aws-sdk-go-v2 v1.36.0
 	github.com/aws/aws-sdk-go-v2/config v1.18.3
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.3
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.42
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.29.4
-	github.com/aws/smithy-go v1.13.4
+	github.com/aws/smithy-go v1.22.2
 	github.com/docker/go-connections v0.4.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-sql-driver/mysql v1.6.0
@@ -112,7 +112,6 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/moby/sys/mount v0.3.3 // indirect
